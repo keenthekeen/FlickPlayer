@@ -16,7 +16,7 @@ export const environment = {
   }
 };
 
-export const ManEndpoint = 'https://flick-man.docchula.com/v1/';
+export const ManEndpoint = 'https://flick-man.docchula.com/';
 
 /*
  * For easier debugging in development mode, you can import the following file

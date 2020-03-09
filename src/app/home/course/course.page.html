@@ -1,0 +1,35 @@
+<link rel="stylesheet" href="course.page.scss">
+<ion-header>
+    <ion-toolbar>
+        <ion-buttons slot="start" routerLink="..">
+            <ion-back-button></ion-back-button>
+        </ion-buttons>
+        <ion-title>{{ course || 'Course'}}</ion-title>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content>
+    <ion-grid>
+        <ion-row>
+            <ion-col size="12" size-lg [hidden]="!videoPlayer || !videoPlayer.src">
+                <video #videoPlayer class="video-js vjs-default-skin fullwidth" controls preload="metadata"
+                       data-setup='{"aspectRatio":"1280:640", "playbackRates": [0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 3], "plugins": {"seekButtons": {"forward": 10, "back": 10}}}'>
+                    Your browser does not support the video tag.
+                </video>
+                <ion-text class="ion-hide-md-down" color="medium"><p>
+                    <strong>Hotkeys</strong>&emsp; Space: Pause, ▲/▼: Volume, ◄/►: Seek, F: Fullscreen | <a (click)="setPlaybackSpeed()">Set playback speed</a>
+                </p></ion-text>
+            </ion-col>
+            <ion-col size="12" size-lg>
+                <ion-list *ngIf="list$ | async as list">
+                    <ion-item button *ngFor="let lecture of list | keyvalue" (click)="viewVideo(lecture.key)">
+                        <ion-label class="ion-text-wrap">
+                          {{ lecture.value.date | date:"d MMM y" }} - {{ lecture.value.title }}
+                          <small>({{ lecture.value.lecturer}})</small>
+                        </ion-label>
+                    </ion-item>
+                </ion-list>
+            </ion-col>
+        </ion-row>
+    </ion-grid>
+</ion-content>

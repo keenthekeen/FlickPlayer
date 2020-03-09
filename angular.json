@@ -38,6 +38,12 @@
               },
               {
                 "input": "src/global.scss"
+              },
+              {
+                "input": "node_modules/video.js/dist/video-js.css"
+              },
+              {
+                "input": "node_modules/videojs-seek-buttons/dist/videojs-seek-buttons.css"
               }
             ],
             "scripts": []
@@ -191,7 +197,8 @@
     }
   },
   "cli": {
-    "defaultCollection": "@ionic/angular-toolkit"
+    "defaultCollection": "@ionic/angular-toolkit",
+    "analytics": "a68a0485-6e9d-44a5-b42d-924ea1260442"
   },
   "schematics": {
     "@ionic/angular-toolkit:component": {

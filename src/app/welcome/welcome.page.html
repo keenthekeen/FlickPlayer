@@ -1,0 +1,27 @@
+<ion-content class="ion-text-center ion-padding">
+    <ion-card>
+        <ion-card-header>
+            <ion-card-title>MDCU Recorded Lecture</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+
+            <div *ngIf="afAuth.user | async as user; else loginMessage">
+                <h2>Hello, {{ user.displayName }}!</h2><br/>
+                <ion-button expand="block" color="tertiary" (click)="goToHome()" *ngIf="isAuthChecked">
+                    Initialize
+                </ion-button>
+                <ion-button expand="block" color="secondary" (click)="logout()">
+                    Sign out
+                </ion-button>
+            </div>
+
+            <ng-template #loginMessage>
+                <p>Sign in with your DocChula account</p><br/>
+                <ion-button shape="round" slot="start" expand="full" color="tertiary" (click)="login()">
+                    Sign in with Docchula
+                </ion-button>
+            </ng-template>
+        </ion-card-content>
+    </ion-card>
+    <p class="grey-text">The Student Union of the Faculty of Medicine, Chulalongkorn University</p>
+</ion-content>

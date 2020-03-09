@@ -12,4 +12,4 @@ export const environment = {
   }
 };
 
-export const ManEndpoint = 'https://flick-man.docchula.com/v1/';
+export const ManEndpoint = 'https://flick-man.docchula.com/';

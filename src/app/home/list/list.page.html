@@ -1,0 +1,16 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-buttons slot="start" routerLink="..">
+            <ion-back-button></ion-back-button>
+        </ion-buttons>
+        <ion-title>{{ year || 'Loading'}}</ion-title>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content>
+    <ion-list *ngIf="list$ | async as list">
+        <ion-item button *ngFor="let course of list" [routerLink]="course">
+            <ion-label>{{ course }}</ion-label>
+        </ion-item>
+    </ion-list>
+</ion-content>

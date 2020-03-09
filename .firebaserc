@@ -1,0 +1,14 @@
+{
+  "targets": {
+    "keendev-flick-a": {
+      "hosting": {
+        "app": [
+          "keendev-flick-a"
+        ]
+      }
+    }
+  },
+  "projects": {
+    "production": "keendev-flick-a"
+  }
+}
