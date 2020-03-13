@@ -30,7 +30,8 @@
                 "glob": "**/*.svg",
                 "input": "node_modules/ionicons/dist/ionicons/svg",
                 "output": "./svg"
-              }
+              },
+              "src/manifest.webmanifest"
             ],
             "styles": [
               {
@@ -38,12 +39,6 @@
               },
               {
                 "input": "src/global.scss"
-              },
-              {
-                "input": "node_modules/video.js/dist/video-js.css"
-              },
-              {
-                "input": "node_modules/videojs-seek-buttons/dist/videojs-seek-buttons.css"
               }
             ],
             "scripts": []
@@ -75,7 +70,9 @@
                   "type": "anyComponentStyle",
                   "maximumWarning": "6kb"
                 }
-              ]
+              ],
+              "serviceWorker": true,
+              "ngswConfigPath": "ngsw-config.json"
             },
             "ci": {
               "budgets": [
@@ -127,7 +124,8 @@
                 "glob": "**/*",
                 "input": "src/assets",
                 "output": "/assets"
-              }
+              },
+              "src/manifest.webmanifest"
             ]
           },
           "configurations": {
