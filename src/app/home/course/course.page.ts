@@ -54,6 +54,9 @@ export class CoursePage implements OnInit, AfterViewInit {
                 enableVolumeScroll: false
             });
         });
+
+        // Setup video request authentication
+        this.videoPlayer.hls.xhr.beforeRequest = this.manService.videoJsAuthOptions();
     }
 
     viewVideo(lecture) {

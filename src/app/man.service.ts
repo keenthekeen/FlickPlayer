@@ -11,6 +11,7 @@ import {map, tap} from 'rxjs/operators';
 })
 export class ManService {
     private videoList: object;
+    private idToken: string;
 
     constructor(private http: HttpClient, private afAuth: AngularFireAuth) {
         // Get authentication data
@@ -26,6 +27,7 @@ export class ManService {
     };
 
     setIdToken(idToken: string) {
+        this.idToken = idToken;
         this.httpOptions.headers =
             this.httpOptions.headers.set('Authorization', 'Bearer ' + idToken);
     }
@@ -64,6 +66,18 @@ export class ManService {
         }
         return this.http.patch(ManEndpoint + path, body, this.httpOptions);
     }*/
+
+    videoJsAuthOptions() {
+        if (this.idToken.length < 5) {
+            console.error('ManService ID token is not set.');
+        }
+        return (options) => {
+            options.headers = {
+                Authorization: 'Bearer ' + this.idToken
+            };
+            return options;
+        };
+    }
 }
 
 export interface CourseMembers {
