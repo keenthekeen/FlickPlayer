@@ -45,7 +45,19 @@ export class CoursePage implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit() {
-        this.videoPlayer = videojs(this.videoPlayerElement.nativeElement);
+        // Override native HLS in Chrome Android, due to lack of support of playbackRate
+        const isChromeAndroid = /Chrome/.test(navigator.userAgent) && /Android/.test(navigator.userAgent);
+        this.videoPlayer = videojs(this.videoPlayerElement.nativeElement, isChromeAndroid ? {
+            html5: {
+                hls: {
+                    overrideNative: true
+                },
+                nativeAudioTracks: false,
+                nativeVideoTracks: false
+            }
+        } : {});
+
+        // Setup hot keys
         this.videoPlayer.ready(function() {
             this.hotkeys({
                 volumeStep: 0.1,
