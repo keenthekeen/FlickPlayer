@@ -39,11 +39,19 @@ export class ManService {
     }
 
     getVideosInCourse(year: string, course: string) {
-        return this.get<CourseMembers>('v1/video/' + year + '/' + course);
+        return this.get<CourseMembers>('v1/video/' + year + '/' + course).pipe(map(response => {
+            for (const courseKey of Object.keys(response)) {
+                response[courseKey] = {
+                    ...response[courseKey],
+                    url: response[courseKey].url ?? (ManEndpoint + 'videos/' + year + '/' + course + '/' + courseKey + '/master.m3u8')
+                };
+            }
+            return response;
+        }));
     }
 
     checkAuthorization(): Observable<boolean> {
-        return this.get<string>('v1/auth_check').pipe(map(a => a === 'OK'));
+        return this.get<object>('v1/auth_check').pipe(map(a => a.hasOwnProperty('success')));
     }
 
     /*updateCurrentStudent(requestBody) {
@@ -84,6 +92,7 @@ export interface CourseMembers {
     [key: string]: {
         title: string,
         lecturer: string,
-        date: string
+        date: string,
+        url?: string
     };
 }

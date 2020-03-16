@@ -45,6 +45,9 @@ export class CoursePage implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit() {
+        // Setup video request authentication
+        videojs.Hls.xhr.beforeRequest = this.manService.videoJsAuthOptions();
+
         // Override native HLS in Chrome Android, due to lack of support of playbackRate
         const isChromeAndroid = /Chrome/.test(navigator.userAgent) && /Android/.test(navigator.userAgent);
         this.videoPlayer = videojs(this.videoPlayerElement.nativeElement, isChromeAndroid ? {
@@ -66,14 +69,11 @@ export class CoursePage implements OnInit, AfterViewInit {
                 enableVolumeScroll: false
             });
         });
-
-        // Setup video request authentication
-        this.videoPlayer.hls.xhr.beforeRequest = this.manService.videoJsAuthOptions();
     }
 
-    viewVideo(lecture) {
+    viewVideo(url) {
         this.videoPlayer.src({
-            src: ManEndpoint + 'videos/' + this.year + '/' + this.course + '/' + lecture + '/master.m3u8',
+            src: url,
             type: 'application/x-mpegURL'
         });
     }
