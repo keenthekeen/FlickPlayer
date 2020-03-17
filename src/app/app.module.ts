@@ -14,6 +14,9 @@ import {AngularFireAuthModule} from '@angular/fire/auth';
 import {WelcomePageModule} from './welcome/welcome.module';
 import {HttpClientModule} from '@angular/common/http';
 import { ServiceWorkerModule } from '@angular/service-worker';
+import {AngularFireAnalyticsModule, UserTrackingService} from '@angular/fire/analytics';
+import {AngularFirePerformanceModule} from '@angular/fire/performance';
+import {AngularFireRemoteConfigModule} from '@angular/fire/remote-config';
 
 @NgModule({
   declarations: [AppComponent],
@@ -25,13 +28,17 @@ import { ServiceWorkerModule } from '@angular/service-worker';
     HttpClientModule,
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireAuthModule,
+    AngularFireAnalyticsModule,
+    AngularFirePerformanceModule,
+    AngularFireRemoteConfigModule,
     WelcomePageModule,
     ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })
   ],
   providers: [
     StatusBar,
     SplashScreen,
-    { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
+    { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
+    UserTrackingService
   ],
   bootstrap: [AppComponent]
 })

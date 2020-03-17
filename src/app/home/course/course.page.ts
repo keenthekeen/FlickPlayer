@@ -6,7 +6,6 @@ import {switchMap} from 'rxjs/operators';
 import videojs from '../../../../node_modules/video.js/dist/video.es';
 import 'videojs-seek-buttons';
 import 'videojs-hotkeys';
-import {ManEndpoint} from '../../../environments/environment';
 import {AlertController} from '@ionic/angular';
 
 @Component({

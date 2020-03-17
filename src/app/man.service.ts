@@ -1,9 +1,10 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {ManEndpoint} from '../environments/environment';
 import {Observable, of} from 'rxjs';
 import {AngularFireAuth} from '@angular/fire/auth';
-import {map, tap} from 'rxjs/operators';
+import {filter, map, tap} from 'rxjs/operators';
+import {AngularFireRemoteConfig} from '@angular/fire/remote-config';
+import {stringify} from 'querystring';
 
 
 @Injectable({
@@ -12,11 +13,16 @@ import {map, tap} from 'rxjs/operators';
 export class ManService {
     private videoList: object;
     private idToken: string;
+    private endpoint: string;
 
-    constructor(private http: HttpClient, private afAuth: AngularFireAuth) {
+    constructor(private http: HttpClient, private afAuth: AngularFireAuth, remoteConfig: AngularFireRemoteConfig) {
         // Get authentication data
         this.afAuth.idToken.subscribe(token => {
             this.setIdToken(token);
+        });
+        // Get endpoint config
+        remoteConfig.strings.manEndpoint.pipe(filter(v => !!v)).subscribe(v => {
+                this.endpoint = v;
         });
     }
 
@@ -33,20 +39,27 @@ export class ManService {
     }
 
     getVideoList(): Observable<object> {
-        return this.videoList ? of(this.videoList) : this.get<object>('v1/video').pipe(tap(a => {
+        return this.videoList ? of(this.videoList) : this.get<JSend<{ years: object }>>('v1/video').pipe(map(response => {
+            return response.data.years;
+        }), tap(a => {
             this.videoList = a;
         }));
     }
 
     getVideosInCourse(year: string, course: string) {
-        return this.get<CourseMembers>('v1/video/' + year + '/' + course).pipe(map(response => {
-            for (const courseKey of Object.keys(response)) {
-                response[courseKey] = {
-                    ...response[courseKey],
-                    url: response[courseKey].url ?? (ManEndpoint + 'videos/' + year + '/' + course + '/' + courseKey + '/master.m3u8')
+        return this.get<JSend<{
+            lectures: CourseMembers,
+            key: string
+        }>>('v1/video/' + year + '/' + course).pipe(map(response => {
+            for (const courseKey of Object.keys(response.data.lectures)) {
+                response.data.lectures[courseKey] = {
+                    ...response.data.lectures[courseKey],
+                    url: response.data.lectures[courseKey].url
+                        ?? (this.endpoint + 'videos/' + year + '/' + course + '/' + courseKey + '/master.m3u8?key='
+                            + encodeURIComponent(response.data.key))
                 };
             }
-            return response;
+            return response.data.lectures;
         }));
     }
 
@@ -64,8 +77,10 @@ export class ManService {
     get<T>(path: string): Observable<T> {
         if (this.httpOptions.headers.get('Authorization').length < 5) {
             console.error('ManService ID token is not set.');
+        } else if (!this.endpoint) {
+            console.error('ManService endpoint is not set.');
         }
-        return this.http.get<T>(ManEndpoint + path, this.httpOptions);
+        return this.http.get<T>(this.endpoint + path, this.httpOptions);
     }
 
     /*patch(path: string, body): Observable<Object> {
@@ -95,4 +110,10 @@ export interface CourseMembers {
         date: string,
         url?: string
     };
+}
+
+export interface JSend<A> {
+    status: string;
+    message?: string;
+    data?: A;
 }
