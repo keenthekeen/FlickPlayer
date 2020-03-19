@@ -7,6 +7,7 @@ import videojs from '../../../../node_modules/video.js/dist/video.es';
 import 'videojs-seek-buttons';
 import 'videojs-hotkeys';
 import {AlertController} from '@ionic/angular';
+import {AngularFireAuth} from '@angular/fire/auth';
 
 @Component({
     selector: 'app-course',
@@ -21,7 +22,17 @@ export class CoursePage implements OnInit, AfterViewInit {
     list$: Observable<CourseMembers>;
 
     constructor(private route: ActivatedRoute, private router: Router,
-                private manService: ManService, private alertController: AlertController) {
+                private manService: ManService, private alertController: AlertController,
+                afAuth: AngularFireAuth) {
+        // Setup video request authentication
+        afAuth.idToken.subscribe(token => {
+            videojs.Hls.xhr.beforeRequest = (options) => {
+                options.headers = {
+                    Authorization: 'Bearer ' + token
+                };
+                return options;
+            };
+        });
     }
 
     ngOnInit() {
@@ -44,9 +55,6 @@ export class CoursePage implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit() {
-        // Setup video request authentication
-        videojs.Hls.xhr.beforeRequest = this.manService.videoJsAuthOptions();
-
         // Override native HLS in Chrome Android, due to lack of support of playbackRate
         const isChromeAndroid = /Chrome/.test(navigator.userAgent) && /Android/.test(navigator.userAgent);
         this.videoPlayer = videojs(this.videoPlayerElement.nativeElement, isChromeAndroid ? {
@@ -63,7 +71,7 @@ export class CoursePage implements OnInit, AfterViewInit {
         this.videoPlayer.ready(function() {
             this.hotkeys({
                 volumeStep: 0.1,
-                seekStep: 5,
+                seekStep: 10,
                 enableModifiersForNumbers: false,
                 enableVolumeScroll: false
             });

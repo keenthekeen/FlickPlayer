@@ -89,18 +89,6 @@ export class ManService {
         }
         return this.http.patch(ManEndpoint + path, body, this.httpOptions);
     }*/
-
-    videoJsAuthOptions() {
-        if (this.idToken.length < 5) {
-            console.error('ManService ID token is not set.');
-        }
-        return (options) => {
-            options.headers = {
-                Authorization: 'Bearer ' + this.idToken
-            };
-            return options;
-        };
-    }
 }
 
 export interface CourseMembers {
