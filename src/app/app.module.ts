@@ -14,8 +14,8 @@ import {AngularFireAuthModule} from '@angular/fire/auth';
 import {WelcomePageModule} from './welcome/welcome.module';
 import {HttpClientModule} from '@angular/common/http';
 import { ServiceWorkerModule } from '@angular/service-worker';
-import {AngularFireAnalyticsModule, UserTrackingService} from '@angular/fire/analytics';
-import {AngularFirePerformanceModule} from '@angular/fire/performance';
+import {AngularFireAnalyticsModule, DEBUG_MODE, UserTrackingService} from '@angular/fire/analytics';
+import {AngularFirePerformanceModule, INSTRUMENTATION_ENABLED} from '@angular/fire/performance';
 import {AngularFireRemoteConfigModule} from '@angular/fire/remote-config';
 
 @NgModule({
@@ -38,7 +38,9 @@ import {AngularFireRemoteConfigModule} from '@angular/fire/remote-config';
     StatusBar,
     SplashScreen,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
-    UserTrackingService
+    UserTrackingService,
+    { provide: INSTRUMENTATION_ENABLED, useValue: environment.production },
+    { provide: DEBUG_MODE, useValue: !environment.production }
   ],
   bootstrap: [AppComponent]
 })
