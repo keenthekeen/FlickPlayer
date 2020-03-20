@@ -56,7 +56,9 @@ export class ManService {
                     ...response.data.lectures[courseKey],
                     url: response.data.lectures[courseKey].url
                         ?? (this.endpoint + 'videos/' + year + '/' + course + '/' + courseKey + '/master.m3u8?key='
-                            + encodeURIComponent(response.data.key))
+                            + encodeURIComponent(response.data.key)),
+                    identifier: response.data.lectures[courseKey].identifier
+                        ?? (year.substr(0,3).trim() + '/' + course.substr(0, 7).trim() + '/' + courseKey)
                 };
             }
             return response.data.lectures;
@@ -96,7 +98,8 @@ export interface CourseMembers {
         title: string,
         lecturer: string,
         date: string,
-        url?: string
+        url?: string,
+        identifier?: string
     };
 }
 

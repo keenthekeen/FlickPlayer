@@ -6,8 +6,10 @@ import {switchMap} from 'rxjs/operators';
 import videojs from '../../../../node_modules/video.js/dist/video.es';
 import 'videojs-seek-buttons';
 import 'videojs-hotkeys';
+import 'videojs-event-tracking';
 import {AlertController} from '@ionic/angular';
 import {AngularFireAuth} from '@angular/fire/auth';
+import {AngularFireAnalytics} from '@angular/fire/analytics';
 
 @Component({
     selector: 'app-course',
@@ -17,13 +19,14 @@ import {AngularFireAuth} from '@angular/fire/auth';
 export class CoursePage implements OnInit, AfterViewInit {
     @ViewChild('videoPlayer') videoPlayerElement: ElementRef;
     videoPlayer: any;
+    videoId: string;
     year: string;
     course: string;
     list$: Observable<CourseMembers>;
 
     constructor(private route: ActivatedRoute, private router: Router,
                 private manService: ManService, private alertController: AlertController,
-                afAuth: AngularFireAuth) {
+                private analytics: AngularFireAnalytics, afAuth: AngularFireAuth) {
         // Setup video request authentication
         afAuth.idToken.subscribe(token => {
             videojs.Hls.xhr.beforeRequest = (options) => {
@@ -76,13 +79,29 @@ export class CoursePage implements OnInit, AfterViewInit {
                 enableVolumeScroll: false
             });
         });
+
+        // Setup video analytics
+        this.videoPlayer.eventTracking({
+            performance: (data) => {
+                this.analytics.logEvent('video_performance', this.attachEventLabel(data, true));
+            }
+        });
+        this.videoPlayer.on('tracking:firstplay', (e, data) =>
+            this.analytics.logEvent('video_firstplay', this.attachEventLabel(data)));
+        this.videoPlayer.on('tracking:first-quarter', (e, data) =>
+            this.analytics.logEvent('video_checkpoint', this.attachEventLabel(data, true)));
+        this.videoPlayer.on('tracking:second-quarter', (e, data) =>
+            this.analytics.logEvent('video_checkpoint', this.attachEventLabel(data, true)));
+        this.videoPlayer.on('tracking:third-quarter', (e, data) =>
+            this.analytics.logEvent('video_checkpoint', this.attachEventLabel(data, true)));
     }
 
-    viewVideo(url) {
+    viewVideo(video) {
         this.videoPlayer.src({
-            src: url,
+            src: video.url,
             type: 'application/x-mpegURL'
         });
+        this.videoId = video.identifier;
     }
 
     async setPlaybackSpeed() {
@@ -114,6 +133,14 @@ export class CoursePage implements OnInit, AfterViewInit {
         });
 
         await alert.present();
+    }
+
+    protected attachEventLabel(data: object, isNonInteraction ?: boolean) {
+        return {
+            ...data,
+            event_label: this.videoId,
+            non_interaction: isNonInteraction === true
+        };
     }
 
 }
