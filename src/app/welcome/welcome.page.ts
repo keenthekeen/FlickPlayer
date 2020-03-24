@@ -4,6 +4,7 @@ import {AlertController, LoadingController} from '@ionic/angular';
 import {Router} from '@angular/router';
 import * as firebase from 'firebase/app';
 import {ManService} from '../man.service';
+import {HttpErrorResponse} from '@angular/common/http';
 
 @Component({
     selector: 'app-welcome',
@@ -39,9 +40,16 @@ export class WelcomePage implements OnInit {
                                 loading.dismiss();
                                 this.goToHome();
                             }
-                        }, (reason) => {
-                            console.error('Student data request failed', reason);
-                            this.alertUnregistered();
+                        }, (reason: HttpErrorResponse) => {
+                            if (reason instanceof ErrorEvent) {
+                                this.alertError('Client Error', 'Please check your network connection.');
+                            } else if (reason.status === 401) {
+                                this.alertError('Unregistered!', 'You are not allowed to access this website.');
+                            } else if (reason.status === 500) {
+                                this.alertError('Server Error', 'Please contact administrator.');
+                            } else {
+                                this.alertError('Unexpected Error', 'Please contact administrator.');
+                            }
                             loading.dismiss();
                         });
                     });
@@ -67,10 +75,10 @@ export class WelcomePage implements OnInit {
         this.router.navigate(['home']);
     }
 
-    async alertUnregistered() {
+    async alertError(header: string, message: string) {
         const alert = await this.alertCtrl.create({
-            header: 'Unregistered!',
-            message: 'You are not allowed to access this website.',
+            header,
+            message,
             buttons: ['OK']
         });
 
