@@ -4,7 +4,6 @@ import {Observable, of} from 'rxjs';
 import {AngularFireAuth} from '@angular/fire/auth';
 import {filter, map, tap} from 'rxjs/operators';
 import {AngularFireRemoteConfig} from '@angular/fire/remote-config';
-import {stringify} from 'querystring';
 
 
 @Injectable({
@@ -22,7 +21,7 @@ export class ManService {
         });
         // Get endpoint config
         remoteConfig.strings.manEndpoint.pipe(filter(v => !!v)).subscribe(v => {
-                this.endpoint = v;
+            this.endpoint = v;
         });
     }
 
@@ -49,16 +48,21 @@ export class ManService {
     getVideosInCourse(year: string, course: string) {
         return this.get<JSend<{
             lectures: CourseMembers,
-            key: string
+            key: string,
+            endpoint?: string
         }>>('v1/video/' + year + '/' + course).pipe(map(response => {
+            let endpoint = response.data.endpoint ?? this.endpoint;
+            if (!endpoint.endsWith('/')) {
+                endpoint += '/';
+            }
             for (const courseKey of Object.keys(response.data.lectures)) {
                 response.data.lectures[courseKey] = {
                     ...response.data.lectures[courseKey],
                     url: response.data.lectures[courseKey].url
-                        ?? (this.endpoint + 'videos/' + year + '/' + course + '/' + courseKey + '/master.m3u8?key='
+                        ?? (endpoint + 'videos/' + year + '/' + course + '/' + courseKey + '/master.m3u8?key='
                             + encodeURIComponent(response.data.key)),
                     identifier: response.data.lectures[courseKey].identifier
-                        ?? (year.substr(0,3).trim() + '/' + course.substr(0, 7).trim() + '/' + courseKey)
+                        ?? (year.substr(0, 3).trim() + '/' + course.substr(0, 7).trim() + '/' + courseKey)
                 };
             }
             return response.data.lectures;
@@ -94,13 +98,15 @@ export class ManService {
 }
 
 export interface CourseMembers {
-    [key: string]: {
-        title: string,
-        lecturer: string,
-        date: string,
-        url?: string,
-        identifier?: string
-    };
+    [key: string]: Lecture;
+}
+
+export interface Lecture {
+    title: string;
+    lecturer: string;
+    date: string;
+    url?: string;
+    identifier?: string;
 }
 
 export interface JSend<A> {
