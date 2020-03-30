@@ -16,7 +16,8 @@
                        data-setup='{"aspectRatio":"1280:640", "playbackRates": [0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 3], "plugins": {"seekButtons": {"forward": 10, "back": 10}}}'>
                     Your browser does not support the video tag.
                 </video>
-                <ion-text color="medium"><p>
+                <ion-text color="medium" *ngIf="currentVideo"><p>
+                    {{ currentVideo.title }} - {{ currentVideo.lecturer }}<br />
                     <span class="ion-hide-md-down"><strong>Hotkeys</strong>&emsp; Space: Pause, ▲/▼: Volume, ◄/►: Seek, F: Fullscreen | </span><a (click)="setPlaybackSpeed()">Set playback speed</a>
                 </p></ion-text>
             </ion-col>
@@ -24,8 +25,8 @@
                 <ion-list *ngIf="list$ | async as list">
                     <ion-item button *ngFor="let lecture of list | keyvalue" (click)="viewVideo(lecture.value)">
                         <ion-label class="ion-text-wrap">
-                          {{ lecture.value.date | date:"d MMM y" }} - {{ lecture.value.title }}
-                          <small>({{ lecture.value.lecturer}})</small>
+                            {{ lecture.value.date | date:"d MMM y" }} - {{ lecture.value.title }}
+                            <small>({{ lecture.value.lecturer}})</small>
                         </ion-label>
                     </ion-item>
                 </ion-list>

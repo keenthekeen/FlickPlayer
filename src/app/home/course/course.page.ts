@@ -1,7 +1,7 @@
 import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {EMPTY, Observable} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
-import {CourseMembers, ManService} from '../../man.service';
+import {CourseMembers, Lecture, ManService} from '../../man.service';
 import {switchMap} from 'rxjs/operators';
 import videojs from '../../../../node_modules/video.js/dist/video.es';
 import 'videojs-seek-buttons';
@@ -19,7 +19,7 @@ import {AngularFireAnalytics} from '@angular/fire/analytics';
 export class CoursePage implements OnInit, AfterViewInit {
     @ViewChild('videoPlayer') videoPlayerElement: ElementRef;
     videoPlayer: any;
-    videoId: string;
+    currentVideo: Lecture;
     year: string;
     course: string;
     list$: Observable<CourseMembers>;
@@ -96,12 +96,12 @@ export class CoursePage implements OnInit, AfterViewInit {
             this.analytics.logEvent('video_checkpoint', this.attachEventLabel(data, true)));
     }
 
-    viewVideo(video) {
+    viewVideo(video: Lecture) {
         this.videoPlayer.src({
             src: video.url,
             type: 'application/x-mpegURL'
         });
-        this.videoId = video.identifier;
+        this.currentVideo = video;
     }
 
     async setPlaybackSpeed() {
@@ -138,7 +138,7 @@ export class CoursePage implements OnInit, AfterViewInit {
     protected attachEventLabel(data: object, isNonInteraction ?: boolean) {
         return {
             ...data,
-            event_label: this.videoId,
+            event_label: this.currentVideo.identifier,
             non_interaction: isNonInteraction === true
         };
     }
