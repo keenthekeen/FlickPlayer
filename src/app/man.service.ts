@@ -49,19 +49,23 @@ export class ManService {
         return this.get<JSend<{
             lectures: CourseMembers,
             key: string,
-            endpoint?: string
+            server?: string
         }>>('v1/video/' + year + '/' + course).pipe(map(response => {
-            let endpoint = response.data.endpoint ?? this.endpoint;
-            if (!endpoint.endsWith('/')) {
-                endpoint += '/';
+            let server = response.data.server ?? (this.endpoint + 'stream');
+            if (!server.endsWith('/')) {
+                server += '/';
             }
             for (const courseKey of Object.keys(response.data.lectures)) {
+                const thisLecture = response.data.lectures[courseKey];
                 response.data.lectures[courseKey] = {
-                    ...response.data.lectures[courseKey],
-                    url: response.data.lectures[courseKey].url
-                        ?? (endpoint + 'videos/' + year + '/' + course + '/' + courseKey + '/master.m3u8?key='
-                            + encodeURIComponent(response.data.key)),
-                    identifier: response.data.lectures[courseKey].identifier
+                    ...thisLecture,
+                    sources: thisLecture.sources.map(source => {
+                        source.src = source.src
+                            ?? ((source.server ?? server) + year + '/' + course + '/' + courseKey + '/' + source.path);
+                        source.src += (server.includes('?') ? '&key=' : '?key=') + encodeURIComponent(response.data.key);
+                        return source;
+                    }),
+                    identifier: thisLecture.identifier
                         ?? (year.substr(0, 3).trim() + '/' + course.substr(0, 7).trim() + '/' + courseKey)
                 };
             }
@@ -105,8 +109,13 @@ export interface Lecture {
     title: string;
     lecturer: string;
     date: string;
-    url?: string;
     identifier?: string;
+    sources: {
+        path: string,
+        type: string,
+        server?: string,
+        src?: string
+    }[];
 }
 
 export interface JSend<A> {

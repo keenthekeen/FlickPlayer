@@ -97,10 +97,7 @@ export class CoursePage implements OnInit, AfterViewInit {
     }
 
     viewVideo(video: Lecture) {
-        this.videoPlayer.src({
-            src: video.url,
-            type: 'application/x-mpegURL'
-        });
+        this.videoPlayer.src(video.sources);
         this.currentVideo = video;
     }
 
