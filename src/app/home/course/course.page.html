@@ -11,10 +11,10 @@
 <ion-content>
     <ion-grid>
         <ion-row>
-            <ion-col size="12" size-lg [hidden]="!videoPlayer || !videoPlayer.src">
+            <ion-col size="12" size-lg [hidden]="!currentVideo">
                 <video #videoPlayer class="video-js vjs-default-skin fullwidth" controls preload="metadata"
                        data-setup='{"aspectRatio":"1280:640", "playbackRates": [0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 3], "plugins": {"seekButtons": {"forward": 10, "back": 10}}}'
-                       (contextmenu)="preventMouseEvent($event)">
+                       (contextmenu)="preventMouseEvent($event)" tabindex="1">
                     Your browser does not support the video tag.
                 </video>
                 <ion-text color="medium" *ngIf="currentVideo"><p>

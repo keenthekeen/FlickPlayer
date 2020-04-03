@@ -99,6 +99,7 @@ export class CoursePage implements OnInit, AfterViewInit {
     viewVideo(video: Lecture) {
         this.videoPlayer.src(video.sources);
         this.currentVideo = video;
+        this.videoPlayerElement.nativeElement.focus();
     }
 
     async setPlaybackSpeed() {
