@@ -19,7 +19,13 @@
                 </video>
                 <ion-text color="medium" *ngIf="currentVideo"><p>
                     {{ currentVideo.title }} - {{ currentVideo.lecturer }}<br />
-                    <span class="ion-hide-md-down"><strong>Hotkeys</strong>&emsp; Space: Pause, ▲/▼: Volume, ◄/►: Seek, F: Fullscreen | </span><a (click)="setPlaybackSpeed()">Set playback speed</a>
+                    <span class="ion-hide-md-down">
+                        <strong>Hotkeys</strong>&emsp; Space: Pause, ▲/▼: Volume, ◄/►: Seek, F: Fullscreen |
+                    </span>
+                    <a (click)="setPlaybackSpeed()">Set playback speed</a>
+                    <span *ngIf="currentVideo.sourceExternal">
+                        | <a [href]="sanitize('intent:'+currentVideo.sourceExternal+'#Intent;S.title='+encodeURIComponent(currentVideo.title)+';package=com.mxtech.videoplayer.ad;end')" rel="noreferrer">View with MX Player</a>
+                    </span>
                 </p></ion-text>
             </ion-col>
             <ion-col size="12" size-lg>

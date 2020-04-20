@@ -4,6 +4,7 @@ import {Observable, of} from 'rxjs';
 import {AngularFireAuth} from '@angular/fire/auth';
 import {filter, map, tap} from 'rxjs/operators';
 import {AngularFireRemoteConfig} from '@angular/fire/remote-config';
+import {environment} from '../environments/environment';
 
 
 @Injectable({
@@ -12,24 +13,25 @@ import {AngularFireRemoteConfig} from '@angular/fire/remote-config';
 export class ManService {
     private videoList: object;
     private idToken: string;
-    private endpoint: string;
+    private endpoint = 'https://flick-man.docchula.com/';
+    private httpOptions = {
+        headers: new HttpHeaders({
+            Authorization: ''
+        })
+    };
 
     constructor(private http: HttpClient, private afAuth: AngularFireAuth, remoteConfig: AngularFireRemoteConfig) {
         // Get authentication data
         this.afAuth.idToken.subscribe(token => {
             this.setIdToken(token);
         });
-        // Get endpoint config
-        remoteConfig.strings.manEndpoint.pipe(filter(v => !!v)).subscribe(v => {
-            this.endpoint = v;
-        });
+        if (environment.production) {
+            // Get endpoint config
+            remoteConfig.strings.manEndpoint.pipe(filter(v => !!v)).subscribe(v => {
+                this.endpoint = v;
+            });
+        }
     }
-
-    private httpOptions = {
-        headers: new HttpHeaders({
-            Authorization: ''
-        })
-    };
 
     setIdToken(idToken: string) {
         this.idToken = idToken;
@@ -68,6 +70,14 @@ export class ManService {
                     identifier: thisLecture.identifier
                         ?? (year.substr(0, 3).trim() + '/' + course.substr(0, 7).trim() + '/' + courseKey)
                 };
+                response.data.lectures[courseKey].sourceExternal = null;
+                if (/Android/i.test(navigator.userAgent)) {
+                    for (const source of response.data.lectures[courseKey].sources) {
+                        if (source.type === 'application/x-mpegURL') {
+                            response.data.lectures[courseKey].sourceExternal = source.src;
+                        }
+                    }
+                }
             }
             return response.data.lectures;
         }));
@@ -113,9 +123,10 @@ export interface Lecture {
     sources: {
         path: string,
         type: string,
-        server?: string,
+        server: string | null,
         src?: string
     }[];
+    sourceExternal?: string;
 }
 
 export interface JSend<A> {

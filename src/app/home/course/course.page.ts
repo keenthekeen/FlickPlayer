@@ -10,6 +10,7 @@ import 'videojs-event-tracking';
 import {AlertController} from '@ionic/angular';
 import {AngularFireAuth} from '@angular/fire/auth';
 import {AngularFireAnalytics} from '@angular/fire/analytics';
+import {DomSanitizer} from '@angular/platform-browser';
 
 @Component({
     selector: 'app-course',
@@ -26,7 +27,8 @@ export class CoursePage implements OnInit, AfterViewInit {
 
     constructor(private route: ActivatedRoute, private router: Router,
                 private manService: ManService, private alertController: AlertController,
-                private analytics: AngularFireAnalytics, afAuth: AngularFireAuth) {
+                private analytics: AngularFireAnalytics, afAuth: AngularFireAuth,
+                private sanitizer: DomSanitizer) {
         // Setup video request authentication
         afAuth.idToken.subscribe(token => {
             videojs.Hls.xhr.beforeRequest = (options) => {
@@ -146,6 +148,14 @@ export class CoursePage implements OnInit, AfterViewInit {
         if (this.currentVideo.sources.filter(s => s.path.endsWith('.mp4') || s.path.endsWith('.webm')).length > 0) {
             $event.preventDefault();
         }
+    }
+
+    sanitize(url: string) {
+        return this.sanitizer.bypassSecurityTrustUrl(url);
+    }
+
+    encodeURIComponent(url: string) {
+        return encodeURIComponent(url);
     }
 
 }
