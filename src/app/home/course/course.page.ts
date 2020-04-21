@@ -99,7 +99,15 @@ export class CoursePage implements OnInit, AfterViewInit {
     }
 
     viewVideo(video: Lecture) {
-        this.videoPlayer.src(video.sources);
+        this.videoPlayer.src(video.sources.filter(source => {
+            return this.videoPlayerElement.nativeElement.canPlayType(
+                source.type.replace('application/dash+xml', 'video/mp4')
+                    .replace('application/x-mpegURL', 'video/mp4')
+                ) !== '';
+        }));
+        if (!/Android/i.test(navigator.userAgent)) {
+            video.sourceExternal = null;
+        }
         this.currentVideo = video;
         this.videoPlayerElement.nativeElement.focus();
     }

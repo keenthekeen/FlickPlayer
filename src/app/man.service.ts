@@ -70,12 +70,10 @@ export class ManService {
                     identifier: thisLecture.identifier
                         ?? (year.substr(0, 3).trim() + '/' + course.substr(0, 7).trim() + '/' + courseKey)
                 };
-                response.data.lectures[courseKey].sourceExternal = null;
-                if (/Android/i.test(navigator.userAgent)) {
-                    for (const source of response.data.lectures[courseKey].sources) {
-                        if (source.type === 'application/x-mpegURL') {
-                            response.data.lectures[courseKey].sourceExternal = source.src;
-                        }
+                for (const source of response.data.lectures[courseKey].sources) {
+                    if (!source.type.startsWith('application/dash+xml')) {
+                        response.data.lectures[courseKey].sourceExternal = source.src;
+                        break;
                     }
                 }
             }
