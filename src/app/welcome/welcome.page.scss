@@ -1,14 +1,10 @@
 ion-content {
-  --ion-background-color: #fafafa;
-
   ion-card {
-    background-color: white;
     max-width: 450px;
-    margin: 20vh auto auto;
+    margin: 20vh auto 0.4rem auto;
   }
 
-  .grey-text {
-    color: gray;
+  .small-text {
     font-size: 0.75rem;
   }
 }
