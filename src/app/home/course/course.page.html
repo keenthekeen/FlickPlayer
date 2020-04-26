@@ -18,13 +18,14 @@
                     Your browser does not support the video tag.
                 </video>
                 <ion-text color="medium" *ngIf="currentVideo"><p>
-                    {{ currentVideo.title }} - {{ currentVideo.lecturer }}<br />
+                    {{ currentVideo.title }} - {{ currentVideo.lecturer }}<br/>
                     <span class="ion-hide-md-down">
                         <strong>Hotkeys</strong>&emsp; Space: Pause, ▲/▼: Volume, ◄/►: Seek, F: Fullscreen |
                     </span>
                     <a (click)="setPlaybackSpeed()">Set playback speed</a>
                     <span *ngIf="currentVideo.sourceExternal">
-                        | <a [href]="sanitize('intent:'+currentVideo.sourceExternal+'#Intent;S.title='+encodeURIComponent(currentVideo.title)+';package=com.mxtech.videoplayer.ad;end')" rel="noreferrer">View with MX Player</a>
+                        | <a [href]="sanitize('intent:'+currentVideo.sourceExternal+'#Intent;S.title='+encodeURIComponent(currentVideo.title)+';package=com.mxtech.videoplayer.ad;end')"
+                             rel="noreferrer">View with MX Player</a>
                     </span>
                 </p></ion-text>
             </ion-col>
@@ -34,7 +35,15 @@
                         <ion-label class="ion-text-wrap">
                             {{ lecture.value.date | date:"d MMM y" }} - {{ lecture.value.title }}
                             <small>({{ lecture.value.lecturer}})</small>
+                            <ion-progress-bar
+                                    *ngIf="lecture.value.history.currentTime && lecture.value.duration && (lecture.value.history.currentTime/lecture.value.duration < 0.995)"
+                                    [value]="lecture.value.history.currentTime/lecture.value.duration"></ion-progress-bar>
                         </ion-label>
+                        <ion-icon
+                                *ngIf="lecture.value.history.currentTime && lecture.value.duration && (lecture.value.history.currentTime/lecture.value.duration >= 0.995)"
+                                name="checkmark-outline"
+                                slot="end"
+                                color="success"></ion-icon>
                     </ion-item>
                 </ion-list>
             </ion-col>

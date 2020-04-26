@@ -5,6 +5,7 @@ import {AngularFireAuth} from '@angular/fire/auth';
 import {filter, map, tap} from 'rxjs/operators';
 import {AngularFireRemoteConfig} from '@angular/fire/remote-config';
 import {environment} from '../environments/environment';
+import {PlayHistoryValue} from './play-tracker.service';
 
 
 @Injectable({
@@ -20,7 +21,8 @@ export class ManService {
         })
     };
 
-    constructor(private http: HttpClient, private afAuth: AngularFireAuth, remoteConfig: AngularFireRemoteConfig) {
+    constructor(private http: HttpClient, private afAuth: AngularFireAuth,
+                remoteConfig: AngularFireRemoteConfig) {
         // Get authentication data
         this.afAuth.idToken.subscribe(token => {
             this.setIdToken(token);
@@ -58,8 +60,8 @@ export class ManService {
                 server += '/';
             }
             for (const courseKey of Object.keys(response.data.lectures)) {
-                const thisLecture = response.data.lectures[courseKey];
-                response.data.lectures[courseKey] = {
+                let thisLecture = response.data.lectures[courseKey];
+                thisLecture = {
                     ...thisLecture,
                     sources: thisLecture.sources.map(source => {
                         source.src = source.src
@@ -70,12 +72,13 @@ export class ManService {
                     identifier: thisLecture.identifier
                         ?? (year.substr(0, 3).trim() + '/' + course.substr(0, 7).trim() + '/' + courseKey)
                 };
-                for (const source of response.data.lectures[courseKey].sources) {
+                for (const source of thisLecture.sources) {
                     if (!source.type.startsWith('application/dash+xml')) {
-                        response.data.lectures[courseKey].sourceExternal = source.src;
+                        thisLecture.sourceExternal = source.src;
                         break;
                     }
                 }
+                response.data.lectures[courseKey] = thisLecture;
             }
             return response.data.lectures;
         }));
@@ -125,6 +128,8 @@ export interface Lecture {
         src?: string
     }[];
     sourceExternal?: string;
+    duration?: number;
+    history?: PlayHistoryValue;
 }
 
 export interface JSend<A> {

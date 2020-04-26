@@ -1,8 +1,8 @@
 import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
-import {EMPTY, Observable} from 'rxjs';
+import {combineLatest, EMPTY, Observable} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
 import {CourseMembers, Lecture, ManService} from '../../man.service';
-import {switchMap} from 'rxjs/operators';
+import {map, switchMap} from 'rxjs/operators';
 import videojs from '../../../../node_modules/video.js/dist/video.es';
 import 'videojs-seek-buttons';
 import 'videojs-hotkeys';
@@ -11,6 +11,7 @@ import {AlertController} from '@ionic/angular';
 import {AngularFireAuth} from '@angular/fire/auth';
 import {AngularFireAnalytics} from '@angular/fire/analytics';
 import {DomSanitizer} from '@angular/platform-browser';
+import {PlayHistory, PlayTrackerService} from '../../play-tracker.service';
 
 @Component({
     selector: 'app-course',
@@ -28,7 +29,7 @@ export class CoursePage implements OnInit, AfterViewInit {
     constructor(private route: ActivatedRoute, private router: Router,
                 private manService: ManService, private alertController: AlertController,
                 private analytics: AngularFireAnalytics, afAuth: AngularFireAuth,
-                private sanitizer: DomSanitizer) {
+                private sanitizer: DomSanitizer, private playTracker: PlayTrackerService) {
         // Setup video request authentication
         afAuth.idToken.subscribe(token => {
             videojs.Hls.xhr.beforeRequest = (options) => {
@@ -48,7 +49,8 @@ export class CoursePage implements OnInit, AfterViewInit {
                 this.year = year;
                 this.course = course;
                 if (year && course) {
-                    return this.manService.getVideosInCourse(year, course);
+                    return combineLatest([this.manService.getVideosInCourse(year, course), this.playTracker.retrieve()])
+                        .pipe(map(([videos, history]) => this.mergeVideoInfo(videos, history)));
                 } else if (year) {
                     this.router.navigate(['home/' + year]);
                 } else {
@@ -86,16 +88,26 @@ export class CoursePage implements OnInit, AfterViewInit {
         this.videoPlayer.eventTracking({
             performance: (data) => {
                 this.analytics.logEvent('video_performance', this.attachEventLabel(data, true));
+                this.playTracker.updateCurrentTime(this.currentVideo.identifier, this.currentVideo.duration);
             }
         });
         this.videoPlayer.on('tracking:firstplay', (e, data) =>
             this.analytics.logEvent('video_firstplay', this.attachEventLabel(data)));
         this.videoPlayer.on('tracking:first-quarter', (e, data) =>
-            this.analytics.logEvent('video_checkpoint', this.attachEventLabel(data, true)));
+            this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime));
         this.videoPlayer.on('tracking:second-quarter', (e, data) =>
-            this.analytics.logEvent('video_checkpoint', this.attachEventLabel(data, true)));
+            this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime));
         this.videoPlayer.on('tracking:third-quarter', (e, data) =>
-            this.analytics.logEvent('video_checkpoint', this.attachEventLabel(data, true)));
+            this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime));
+        this.videoPlayer.on('tracking:pause', (e, data) =>
+            this.playTracker.updateCurrentTime(this.currentVideo.identifier, this.videoPlayer.currentTime()));
+    }
+
+    mergeVideoInfo(videos: CourseMembers, history: PlayHistory) {
+        Object.keys(videos).forEach(lectureKey => {
+            videos[lectureKey].history = history[videos[lectureKey].identifier] ?? {currentTime: null, updatedAt: null};
+        });
+        return videos;
     }
 
     viewVideo(video: Lecture) {
@@ -103,7 +115,7 @@ export class CoursePage implements OnInit, AfterViewInit {
             return this.videoPlayerElement.nativeElement.canPlayType(
                 source.type.replace('application/dash+xml', 'video/mp4')
                     .replace('application/x-mpegURL', 'video/mp4')
-                ) !== '';
+            ) !== '';
         }));
         if (!/Android/i.test(navigator.userAgent)) {
             video.sourceExternal = null;
@@ -143,14 +155,6 @@ export class CoursePage implements OnInit, AfterViewInit {
         await alert.present();
     }
 
-    protected attachEventLabel(data: object, isNonInteraction ?: boolean) {
-        return {
-            ...data,
-            event_label: this.currentVideo.identifier,
-            non_interaction: isNonInteraction === true
-        };
-    }
-
     preventMouseEvent($event: MouseEvent) {
         // Prevent right-click only if video is downloadable
         if (this.currentVideo.sources.filter(s => s.path.endsWith('.mp4') || s.path.endsWith('.webm')).length > 0) {
@@ -164,6 +168,14 @@ export class CoursePage implements OnInit, AfterViewInit {
 
     encodeURIComponent(url: string) {
         return encodeURIComponent(url);
+    }
+
+    protected attachEventLabel(data, isNonInteraction ?: boolean) {
+        return {
+            ...data,
+            event_label: this.currentVideo.identifier,
+            non_interaction: isNonInteraction === true
+        };
     }
 
 }
