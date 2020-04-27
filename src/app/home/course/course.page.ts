@@ -87,8 +87,10 @@ export class CoursePage implements OnInit, AfterViewInit {
         // Setup video analytics
         this.videoPlayer.eventTracking({
             performance: (data) => {
-                this.analytics.logEvent('video_performance', this.attachEventLabel(data, true));
-                this.playTracker.updateCurrentTime(this.currentVideo.identifier, this.currentVideo.duration);
+                if (this.videoPlayer.currentTime() > 30) {
+                    this.analytics.logEvent('video_performance', this.attachEventLabel(data, true));
+                    this.playTracker.updateCurrentTime(this.currentVideo.identifier, this.currentVideo.duration);
+                }
             }
         });
         this.videoPlayer.on('tracking:firstplay', (e, data) =>
@@ -101,6 +103,13 @@ export class CoursePage implements OnInit, AfterViewInit {
             this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime));
         this.videoPlayer.on('tracking:pause', (e, data) =>
             this.playTracker.updateCurrentTime(this.currentVideo.identifier, this.videoPlayer.currentTime()));
+        this.videoPlayer.on('loadedmetadata', (e, data) => {
+            if (this.currentVideo.history.currentTime
+                && this.currentVideo.duration
+                && (((this.currentVideo.history.currentTime ?? 0) / this.currentVideo.duration) < 0.995)) {
+                this.videoPlayer.currentTime(this.currentVideo.history.currentTime);
+            }
+        });
     }
 
     mergeVideoInfo(videos: CourseMembers, history: PlayHistory) {
