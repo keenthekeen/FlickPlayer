@@ -5,6 +5,7 @@ import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import {take} from 'rxjs/operators';
 import {Observable} from 'rxjs';
+import Timestamp = firebase.firestore.Timestamp;
 
 @Injectable({
     providedIn: 'root'
@@ -43,7 +44,7 @@ export class PlayTrackerService {
         const history = {};
         const historyKeys = Object.keys(this.history);
         historyKeys.forEach(key => {
-            if ((Date.now() - Date.parse(this.history[key].updatedAt)) <= 2592000000) {
+            if ((Date.now() - +this.history[key].updatedAt.toDate()) <= 2592000000) {
                 // Store for 30 days
                 history[key] = this.history[key];
             }
@@ -68,5 +69,5 @@ export interface PlayHistory {
 
 export interface PlayHistoryValue {
     currentTime: number | null;
-    updatedAt: any | null;
+    updatedAt: Timestamp | null;
 }
