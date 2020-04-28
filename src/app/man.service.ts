@@ -112,6 +112,13 @@ export class ManService {
     }*/
 }
 
+export const ManServiceStub: Partial<ManService> = {
+    getVideosInCourse: () => of({}),
+    getVideoList: () => of({}),
+    setIdToken: (idToken: string) => {
+    }
+};
+
 export interface CourseMembers {
     [key: string]: Lecture;
 }

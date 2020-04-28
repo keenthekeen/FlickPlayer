@@ -56,6 +56,11 @@ export class PlayTrackerService {
     }
 }
 
+export const PlayTrackerServiceStub: Partial<PlayTrackerService> = {
+    retrieve: () => new BehaviorSubject<PlayHistory>({}),
+    updateCurrentTime: (identifier: string, value: number) => {}
+};
+
 export interface UserDocument {
     playHistory: PlayHistory;
 }
