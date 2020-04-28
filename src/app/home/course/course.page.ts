@@ -3,7 +3,7 @@ import {combineLatest, EMPTY, Observable} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
 import {CourseMembers, Lecture, ManService} from '../../man.service';
 import {map, switchMap} from 'rxjs/operators';
-import videojs from '../../../../node_modules/video.js/dist/video.es';
+import videojs from 'video.js';
 import 'videojs-seek-buttons';
 import 'videojs-hotkeys';
 import 'videojs-event-tracking';
@@ -44,15 +44,14 @@ export class CoursePage implements OnInit, AfterViewInit {
     ngOnInit() {
         this.list$ = this.route.paramMap.pipe(
             switchMap(s => {
-                const year = s.get('year');
-                const course = s.get('course');
-                this.year = year;
-                this.course = course;
-                if (year && course) {
-                    return combineLatest([this.manService.getVideosInCourse(year, course), this.playTracker.retrieve()])
+                this.year = s.get('year');
+                this.course = s.get('course');
+                if (this.year && this.course) {
+                    return combineLatest([
+                        this.manService.getVideosInCourse(this.year, this.course), this.playTracker.retrieve()])
                         .pipe(map(([videos, history]) => this.mergeVideoInfo(videos, history)));
-                } else if (year) {
-                    this.router.navigate(['home/' + year]);
+                } else if (this.year) {
+                    this.router.navigate(['home/' + this.year]);
                 } else {
                     this.router.navigate(['home']);
                 }
