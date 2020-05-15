@@ -120,6 +120,10 @@ export class CoursePage implements OnInit, AfterViewInit {
 
     viewVideo(video: Lecture) {
         this.videoPlayer.src(video.sources.filter(source => {
+            if (videojs.browser.IS_SAFARI
+                && (source.type.startsWith('application/dash+xml') || source.type.startsWith('video/webm'))) {
+                return false;
+            }
             return this.videoPlayerElement.nativeElement.canPlayType(
                 source.type.replace('application/dash+xml', 'video/mp4')
                     .replace('application/x-mpegURL', 'video/mp4')
