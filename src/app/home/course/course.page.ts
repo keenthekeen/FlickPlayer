@@ -1,5 +1,5 @@
-import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
-import {combineLatest, EMPTY, Observable} from 'rxjs';
+import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {combineLatest, EMPTY, Observable, Subscription} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
 import {CourseMembers, Lecture, ManService} from '../../man.service';
 import {map, switchMap} from 'rxjs/operators';
@@ -18,20 +18,21 @@ import {PlayHistory, PlayTrackerService} from '../../play-tracker.service';
     templateUrl: './course.page.html',
     styleUrls: ['./course.page.scss']
 })
-export class CoursePage implements OnInit, AfterViewInit {
+export class CoursePage implements OnInit, OnDestroy, AfterViewInit {
     @ViewChild('videoPlayer') videoPlayerElement: ElementRef;
     videoPlayer: any;
     currentVideo: Lecture;
     year: string;
     course: string;
     list$: Observable<CourseMembers>;
+    idTokenSubscription: Subscription;
 
     constructor(private route: ActivatedRoute, private router: Router,
                 private manService: ManService, private alertController: AlertController,
                 private analytics: AngularFireAnalytics, afAuth: AngularFireAuth,
                 private sanitizer: DomSanitizer, private playTracker: PlayTrackerService) {
         // Setup video request authentication
-        afAuth.idToken.subscribe(token => {
+        this.idTokenSubscription = afAuth.idToken.subscribe(token => {
             videojs.Hls.xhr.beforeRequest = (options) => {
                 options.headers = {
                     Authorization: 'Bearer ' + token
@@ -111,6 +112,10 @@ export class CoursePage implements OnInit, AfterViewInit {
         });
     }
 
+    ngOnDestroy() {
+        this.idTokenSubscription.unsubscribe();
+    }
+
     mergeVideoInfo(videos: CourseMembers, history: PlayHistory) {
         Object.keys(videos).forEach(lectureKey => {
             videos[lectureKey].history = history[videos[lectureKey].identifier] ?? {currentTime: null, updatedAt: null};
@@ -180,6 +185,10 @@ export class CoursePage implements OnInit, AfterViewInit {
 
     encodeURIComponent(url: string) {
         return encodeURIComponent(url);
+    }
+
+    lectureById(index: number, lecture: Lecture) {
+        return lecture.identifier;
     }
 
     protected attachEventLabel(data, isNonInteraction ?: boolean) {

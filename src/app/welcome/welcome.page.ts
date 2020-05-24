@@ -1,18 +1,20 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {AngularFireAuth} from '@angular/fire/auth';
 import {AlertController, LoadingController} from '@ionic/angular';
 import {Router} from '@angular/router';
 import * as firebase from 'firebase/app';
 import {ManService} from '../man.service';
 import {HttpErrorResponse} from '@angular/common/http';
+import {Subscription} from 'rxjs';
 
 @Component({
     selector: 'app-welcome',
     templateUrl: './welcome.page.html',
     styleUrls: ['./welcome.page.scss']
 })
-export class WelcomePage implements OnInit {
+export class WelcomePage implements OnInit, OnDestroy {
     isAuthChecked: boolean;
+    authStateSubscription: Subscription;
 
     constructor(
         private router: Router, public afAuth: AngularFireAuth,
@@ -26,7 +28,7 @@ export class WelcomePage implements OnInit {
             duration: 7000
         }).then(loading => {
             loading.present();
-            this.afAuth.authState.subscribe((user) => {
+            this.authStateSubscription = this.afAuth.authState.subscribe((user) => {
                 if (user) {
                     // User is signed in.
                     // Set ID token for Man service
@@ -60,6 +62,9 @@ export class WelcomePage implements OnInit {
         }).catch(e => console.log('Reject', e));
     }
 
+    ngOnDestroy() {
+        this.authStateSubscription.unsubscribe();
+    }
 
     login() {
         const provider = new firebase.auth.GoogleAuthProvider();
