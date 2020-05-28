@@ -42,8 +42,10 @@ export class PlayTrackerService {
             const newHistory = {};
             Object.keys(history).forEach(key => {
                 // @ts-ignore
-                if (history[key].currentTime && (Date.now() - +history[key].updatedAt.toDate()) <= 5184000000) {
-                    // Store for 60 days
+                if (history[key].currentTime
+                    && history[key].currentTime > 3
+                    && (Date.now() - +history[key].updatedAt.toDate()) <= 10368000000) {
+                    // Store for 120 days
                     newHistory[key] = history[key];
                 }
             });

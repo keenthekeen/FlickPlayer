@@ -70,7 +70,8 @@ export class ManService {
                         return source;
                     }),
                     identifier: thisLecture.identifier
-                        ?? (year.substr(0, 3).trim() + '/' + course.substr(0, 7).trim() + '/' + courseKey)
+                        ?? (year.substr(0, 3).trim() + '/' + course.substr(0, 7).trim() + '/' + courseKey),
+                    durationInMin: thisLecture.duration ? Math.round(thisLecture.duration / 60) : 0
                 };
                 for (const source of thisLecture.sources) {
                     if (!source.type.startsWith('application/dash+xml')) {
@@ -136,6 +137,7 @@ export interface Lecture {
     }[];
     sourceExternal?: string;
     duration?: number;
+    durationInMin?: number;
     history?: PlayHistoryValue;
 }
 
