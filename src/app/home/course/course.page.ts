@@ -124,7 +124,7 @@ export class CoursePage implements OnInit, OnDestroy, AfterViewInit {
     }
 
     viewVideo(video: Lecture) {
-        this.videoPlayer.src(video.sources.filter(source => {
+        video.sources = video.sources.filter(source => {
             if (videojs.browser.IS_SAFARI
                 && (source.type.startsWith('application/dash+xml') || source.type.startsWith('video/webm'))) {
                 return false;
@@ -133,7 +133,8 @@ export class CoursePage implements OnInit, OnDestroy, AfterViewInit {
                 source.type.replace('application/dash+xml', 'video/mp4')
                     .replace('application/x-mpegURL', 'video/mp4')
             ) !== '';
-        }));
+        });
+        this.videoPlayer.src(video.sources);
         if (!/Android/i.test(navigator.userAgent)) {
             video.sourceExternal = null;
         }

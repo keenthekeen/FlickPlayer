@@ -61,14 +61,22 @@ export class ManService {
             }
             for (const courseKey of Object.keys(response.data.lectures)) {
                 let thisLecture = response.data.lectures[courseKey];
+                const identifierFragment = year + '/' + course + '/' + courseKey + '/';
                 thisLecture = {
                     ...thisLecture,
                     sources: thisLecture.sources.map(source => {
                         source.src = source.src
-                            ?? ((source.server ?? server) + year + '/' + course + '/' + courseKey + '/' + source.path);
+                            ?? ((source.server ?? server) + identifierFragment + source.path);
                         source.src += (server.includes('?') ? '&key=' : '?key=') + encodeURIComponent(response.data.key);
                         return source;
                     }),
+                    attachments: thisLecture.attachments ? thisLecture.attachments.map(source => {
+                        source.src = source.src
+                            ?? ((source.server ?? server) + identifierFragment + source.path);
+                        source.src += (server.includes('?') ? '&key=' : '?key=') + encodeURIComponent(response.data.key);
+                        source.name = source.name ?? source.path.substr(3);
+                        return source;
+                    }) : [],
                     identifier: thisLecture.identifier
                         ?? (year.substr(0, 3).trim() + '/' + course.substr(0, 7).trim() + '/' + courseKey),
                     durationInMin: thisLecture.duration ? Math.round(thisLecture.duration / 60) : 0
@@ -134,6 +142,12 @@ export interface Lecture {
         type: string,
         server: string | null,
         src?: string
+    }[];
+    attachments: {
+        server: string | null,
+        path: string,
+        src?: string,
+        name?: string
     }[];
     sourceExternal?: string;
     duration?: number;
