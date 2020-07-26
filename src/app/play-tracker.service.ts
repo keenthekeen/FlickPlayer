@@ -23,8 +23,6 @@ export class PlayTrackerService {
             aFirestore.doc<UserDocument>(this.documentId).valueChanges().subscribe(doc => {
                 if (doc) {
                     this.history$.next(doc.playHistory ?? {});
-                } else {
-                    this.aFirestore.doc<UserDocument>(this.documentId).set({playHistory: {}});
                 }
             });
         });
