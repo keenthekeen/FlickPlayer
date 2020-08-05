@@ -52,7 +52,7 @@ export class PlayTrackerService {
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             };
             return newHistory;
-        })).subscribe(history => this.aFirestore.doc<UserDocument>(this.documentId).update({playHistory: history}));
+        })).subscribe(history => this.aFirestore.doc<UserDocument>(this.documentId).set({playHistory: history}));
     }
 }
 

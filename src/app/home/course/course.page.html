@@ -57,11 +57,11 @@
                             <small>
                                 {{ lecture.value.lecturer}}
                                 <span *ngIf="lecture.value.durationInMin">- {{ lecture.value.durationInMin}} min </span>
-                                <span *ngIf="lecture.value.history.currentTime && lecture.value.duration && (lecture.value.history.currentTime/lecture.value.duration < 0.995)">
+                                <span *ngIf="lecture.value.history.currentTime && lecture.value.duration && lecture.value.history.currentTime > 3 && (lecture.value.history.currentTime/lecture.value.duration < 0.995)">
                                     - {{ (lecture.value.duration - lecture.value.history.currentTime) / 60 | number:'1.0-0'}} min left </span>
                             </small>
                             <ion-progress-bar
-                                    *ngIf="lecture.value.history.currentTime && lecture.value.duration && (lecture.value.history.currentTime/lecture.value.duration < 0.995)"
+                                    *ngIf="lecture.value.history.currentTime && lecture.value.duration && lecture.value.history.currentTime > 3 && (lecture.value.history.currentTime/lecture.value.duration < 0.995)"
                                     [value]="lecture.value.history.currentTime/lecture.value.duration"></ion-progress-bar>
                         </ion-label>
                         <ion-icon
