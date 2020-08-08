@@ -135,7 +135,7 @@ export interface CourseMembers {
 export interface Lecture {
     title: string;
     lecturer: string;
-    date: string;
+    date: string | null;
     identifier?: string;
     sources: {
         path: string,

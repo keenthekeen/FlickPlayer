@@ -53,7 +53,8 @@
                 <ion-list *ngIf="list$ | async as list">
                     <ion-item button *ngFor="let lecture of list | keyvalue trackBy: lectureById" (click)="viewVideo(lecture.value)">
                         <ion-label class="ion-text-wrap">
-                            {{ lecture.value.date | date:"d MMM y" }} - {{ lecture.value.title }}
+                            <span *ngIf="lecture.value.date">{{ lecture.value.date | date:"d MMM y" }} - </span>
+                            {{ lecture.value.title }}
                             <small>
                                 {{ lecture.value.lecturer}}
                                 <span *ngIf="lecture.value.durationInMin">- {{ lecture.value.durationInMin}} min </span>
