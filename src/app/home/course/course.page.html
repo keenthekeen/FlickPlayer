@@ -60,6 +60,7 @@
                                 <span *ngIf="lecture.value.durationInMin">- {{ lecture.value.durationInMin}} min </span>
                                 <span *ngIf="lecture.value.history.currentTime && lecture.value.duration && lecture.value.history.currentTime > 3 && (lecture.value.history.currentTime/lecture.value.duration < 0.995)">
                                     - {{ (lecture.value.duration - lecture.value.history.currentTime) / 60 | number:'1.0-0'}} min left </span>
+                                <ion-icon *ngIf="lecture.value.attachments.length != 0" name="download" size="small" color="medium"></ion-icon>
                             </small>
                             <ion-progress-bar
                                     *ngIf="lecture.value.history.currentTime && lecture.value.duration && lecture.value.history.currentTime > 3 && (lecture.value.history.currentTime/lecture.value.duration < 0.995)"
