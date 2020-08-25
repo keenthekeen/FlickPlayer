@@ -89,7 +89,7 @@ export class CoursePage implements OnInit, OnDestroy, AfterViewInit {
             performance: (data) => {
                 if (this.videoPlayer.currentTime() > 30) {
                     this.analytics.logEvent('video_performance', this.attachEventLabel(data, true));
-                    this.playTracker.updateCurrentTime(this.currentVideo.identifier, this.currentVideo.duration);
+                    this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime);
                 }
             }
         });
