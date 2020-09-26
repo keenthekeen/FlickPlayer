@@ -14,7 +14,8 @@ import {PlayHistoryValue} from './play-tracker.service';
 export class ManService {
     private videoList: object;
     private idToken: string;
-    private endpoint = 'https://flick-man.docchula.com/';
+    private endpoint = ['https://flick-man.docchula.com/', 'https://flick-man-cf.docchula.com/'];
+    private originalEndpoint = ['https://flick-man.docchula.com/'];
     private httpOptions = {
         headers: new HttpHeaders({
             Authorization: ''
@@ -55,7 +56,7 @@ export class ManService {
             key: string,
             server?: string
         }>>('v1/video/' + year + '/' + course).pipe(map(response => {
-            let server = response.data.server ?? (this.endpoint + 'stream');
+            let server = response.data.server ?? (this.getEndpointLocation() + 'stream');
             if (!server.endsWith('/')) {
                 server += '/';
             }
@@ -97,6 +98,18 @@ export class ManService {
         return this.get<object>('v1/auth_check').pipe(map(a => a.hasOwnProperty('success')));
     }
 
+    changeEndpoint() {
+        this.endpoint.shift();
+    }
+
+    private getEndpointLocation(): string {
+        if (this.endpoint.length > 0) {
+            return this.endpoint[0];
+        } else {
+            return this.originalEndpoint[0];
+        }
+    }
+
     /*updateCurrentStudent(requestBody) {
         if (!this.email) {
             console.error('ManService user email is not set.');
@@ -110,7 +123,7 @@ export class ManService {
         } else if (!this.endpoint) {
             console.error('ManService endpoint is not set.');
         }
-        return this.http.get<T>(this.endpoint + path, this.httpOptions);
+        return this.http.get<T>(this.getEndpointLocation() + path, this.httpOptions);
     }
 
     /*patch(path: string, body): Observable<Object> {

@@ -34,24 +34,7 @@ export class WelcomePage implements OnInit, OnDestroy {
                     // Set ID token for Man service
                     user.getIdToken().then(idToken => {
                         this.manService.setIdToken(idToken);
-
-                        // Get this user's student information
-                        this.manService.checkAuthorization().toPromise().then((result) => {
-                            if (result) {
-                                this.isAuthChecked = true;
-                                loading.dismiss();
-                                this.goToHome();
-                            }
-                        }, (reason: HttpErrorResponse) => {
-                            if (reason instanceof ErrorEvent) {
-                                this.alertError('Client Error', 'Please check your network connection.');
-                            } else if (reason.status === 401) {
-                                this.alertError('Unregistered!', 'You are not allowed to access this website.');
-                            } else if (reason.status === 500) {
-                                this.alertError('Server Error', 'Please contact administrator.');
-                            } else {
-                                this.alertError('Unexpected Error', 'Please contact administrator.');
-                            }
+                        this.goToHome().then(_ => {
                             loading.dismiss();
                         });
                     });
@@ -77,7 +60,32 @@ export class WelcomePage implements OnInit, OnDestroy {
     }
 
     goToHome() {
-        this.router.navigate(['home']);
+        return new Promise(resolve => {
+            if (this.isAuthChecked) {
+                this.router.navigate(['home']);
+            } else {
+                // Get this user's student information
+                this.manService.checkAuthorization().toPromise().then((result) => {
+                    if (result) {
+                        this.isAuthChecked = true;
+                        resolve();
+                        this.goToHome();
+                    }
+                }, (reason: HttpErrorResponse) => {
+                    if (reason instanceof ErrorEvent) {
+                        this.alertError('Client Error', 'Please check your network connection.');
+                    } else if (reason.status === 401) {
+                        this.alertError('Unregistered!', 'You are not allowed to access this website.');
+                    } else if (reason.status === 500 || reason.status === 502 || reason.status === 503 || reason.status === 504) {
+                        this.alertError('Server Error', 'Please contact administrator.');
+                    } else {
+                        this.manService.changeEndpoint();
+                        this.alertError('Connection Error', 'Unable to reach server. You may try again.');
+                    }
+                    resolve();
+                });
+            }
+        });
     }
 
     async alertError(header: string, message: string) {

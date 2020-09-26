@@ -7,7 +7,7 @@
 
             <div *ngIf="afAuth.user | async as user; else loginMessage">
                 <h2>Hello, {{ user.displayName }}!</h2><br/>
-                <ion-button expand="block" color="tertiary" (click)="goToHome()" *ngIf="isAuthChecked">
+                <ion-button expand="block" color="tertiary" (click)="goToHome()">
                     View Courses
                 </ion-button>
                 <ion-button expand="block" color="secondary" (click)="logout()">
