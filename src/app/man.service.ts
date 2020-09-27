@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Observable, of} from 'rxjs';
 import {AngularFireAuth} from '@angular/fire/auth';
-import {filter, map, tap} from 'rxjs/operators';
+import {filter, map, tap, timeout} from 'rxjs/operators';
 import {AngularFireRemoteConfig} from '@angular/fire/remote-config';
 import {environment} from '../environments/environment';
 import {PlayHistoryValue} from './play-tracker.service';
@@ -31,7 +31,9 @@ export class ManService {
         if (environment.production) {
             // Get endpoint config
             remoteConfig.strings.manEndpoint.pipe(filter(v => !!v)).subscribe(v => {
-                this.endpoint = v;
+                const w = v.split(',');
+                this.endpoint = w;
+                this.originalEndpoint = w;
             });
         }
     }
@@ -95,7 +97,7 @@ export class ManService {
     }
 
     checkAuthorization(): Observable<boolean> {
-        return this.get<object>('v1/auth_check').pipe(map(a => a.hasOwnProperty('success')));
+        return this.get<object>('v1/auth_check').pipe(timeout(8000), map(a => a.hasOwnProperty('success')));
     }
 
     changeEndpoint() {
@@ -120,7 +122,7 @@ export class ManService {
     get<T>(path: string): Observable<T> {
         if (this.httpOptions.headers.get('Authorization').length < 5) {
             console.error('ManService ID token is not set.');
-        } else if (!this.endpoint) {
+        } else if (!this.getEndpointLocation()) {
             console.error('ManService endpoint is not set.');
         }
         return this.http.get<T>(this.getEndpointLocation() + path, this.httpOptions);
