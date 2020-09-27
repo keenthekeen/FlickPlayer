@@ -4,7 +4,10 @@
         <ion-buttons slot="start" routerLink="..">
             <ion-back-button defaultHref=".."></ion-back-button>
         </ion-buttons>
-        <ion-title>{{ course || 'Course'}}</ion-title>
+        <ion-title>
+            {{ course || 'Course'}}
+            <small *ngIf="courseProgress.duration > 0">{{ (courseProgress.duration-courseProgress.viewed)/ 60 | number:'1.0-0' }} min left</small>
+        </ion-title>
     </ion-toolbar>
 </ion-header>
 

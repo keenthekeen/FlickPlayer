@@ -26,6 +26,10 @@ export class CoursePage implements OnInit, OnDestroy, AfterViewInit {
     course: string;
     list$: Observable<CourseMembers>;
     idTokenSubscription: Subscription;
+    courseProgress = {
+        viewed: 0,
+        duration: 0
+    };
 
     constructor(private route: ActivatedRoute, private router: Router,
                 private manService: ManService, private alertController: AlertController,
@@ -101,6 +105,8 @@ export class CoursePage implements OnInit, OnDestroy, AfterViewInit {
             this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime));
         this.videoPlayer.on('tracking:third-quarter', (e, data) =>
             this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime));
+        this.videoPlayer.on('tracking:fourth-quarter', (e, data) =>
+            this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime));
         this.videoPlayer.on('tracking:pause', (e, data) =>
             this.playTracker.updateCurrentTime(this.currentVideo.identifier, this.videoPlayer.currentTime()));
         this.videoPlayer.on('loadedmetadata', (e, data) => {
@@ -117,9 +123,20 @@ export class CoursePage implements OnInit, OnDestroy, AfterViewInit {
     }
 
     mergeVideoInfo(videos: CourseMembers, history: PlayHistory) {
+        const progress = {
+            viewed: 0,
+            duration: 0
+        };
         Object.keys(videos).forEach(lectureKey => {
             videos[lectureKey].history = history[videos[lectureKey].identifier] ?? {currentTime: null, updatedAt: null};
+            if (videos[lectureKey].duration) {
+                progress.duration -= -videos[lectureKey].duration;
+                if (videos[lectureKey].history.currentTime) {
+                    progress.viewed -= -videos[lectureKey].history.currentTime;
+                }
+            }
         });
+        this.courseProgress = progress;
         return videos;
     }
 
