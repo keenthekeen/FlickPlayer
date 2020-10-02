@@ -47,7 +47,7 @@
                         </ion-list-header>
                         <ion-item *ngFor="let attachment of currentVideo.attachments">
                             <ion-label>{{ attachment.name }}</ion-label>
-                            <a [href]="attachment.src" download><ion-icon name="download" size="small" slot="end"></ion-icon></a>
+                            <a [href]="attachment.src" download target="_blank"><ion-icon name="download" size="small" slot="end"></ion-icon></a>
                         </ion-item>
                     </ion-list>
                 </ng-container>
