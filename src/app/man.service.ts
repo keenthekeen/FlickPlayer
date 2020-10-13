@@ -14,8 +14,8 @@ import {PlayHistoryValue} from './play-tracker.service';
 export class ManService {
     private videoList: object;
     private idToken: string;
-    private endpoint = ['https://flick-man.docchula.com/', 'https://flick-man-cf.docchula.com/'];
-    private originalEndpoint = ['https://flick-man.docchula.com/'];
+    private endpoint = ['https://flick-man-cf.docchula.com/', 'https://flick-man.docchula.com/'];
+    private originalEndpoint = ['https://flick-man-cf.docchula.com/'];
     private httpOptions = {
         headers: new HttpHeaders({
             Authorization: ''
