@@ -1,5 +1,5 @@
-import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {combineLatest, EMPTY, Observable, Subscription} from 'rxjs';
+import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {combineLatest, EMPTY, Observable} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
 import {CourseMembers, Lecture, ManService} from '../../man.service';
 import {map, switchMap} from 'rxjs/operators';
@@ -8,7 +8,6 @@ import 'videojs-seek-buttons';
 import 'videojs-hotkeys';
 import 'videojs-event-tracking';
 import {AlertController} from '@ionic/angular';
-import {AngularFireAuth} from '@angular/fire/auth';
 import {AngularFireAnalytics} from '@angular/fire/analytics';
 import {DomSanitizer} from '@angular/platform-browser';
 import {PlayHistory, PlayTrackerService} from '../../play-tracker.service';
@@ -18,14 +17,13 @@ import {PlayHistory, PlayTrackerService} from '../../play-tracker.service';
     templateUrl: './course.page.html',
     styleUrls: ['./course.page.scss']
 })
-export class CoursePage implements OnInit, OnDestroy, AfterViewInit {
+export class CoursePage implements OnInit, AfterViewInit {
     @ViewChild('videoPlayer') videoPlayerElement: ElementRef;
     videoPlayer: any;
     currentVideo: Lecture;
     year: string;
     course: string;
     list$: Observable<CourseMembers>;
-    idTokenSubscription: Subscription;
     courseProgress = {
         viewed: 0,
         duration: 0
@@ -33,17 +31,8 @@ export class CoursePage implements OnInit, OnDestroy, AfterViewInit {
 
     constructor(private route: ActivatedRoute, private router: Router,
                 private manService: ManService, private alertController: AlertController,
-                private analytics: AngularFireAnalytics, afAuth: AngularFireAuth,
-                private sanitizer: DomSanitizer, private playTracker: PlayTrackerService) {
-        // Setup video request authentication
-        this.idTokenSubscription = afAuth.idToken.subscribe(token => {
-            videojs.Hls.xhr.beforeRequest = (options) => {
-                options.headers = {
-                    Authorization: 'Bearer ' + token
-                };
-                return options;
-            };
-        });
+                private analytics: AngularFireAnalytics, private sanitizer: DomSanitizer,
+                private playTracker: PlayTrackerService) {
     }
 
     ngOnInit() {
@@ -107,19 +96,15 @@ export class CoursePage implements OnInit, OnDestroy, AfterViewInit {
             this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime));
         this.videoPlayer.on('tracking:fourth-quarter', (e, data) =>
             this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime));
-        this.videoPlayer.on('tracking:pause', (e, data) =>
+        this.videoPlayer.on('tracking:pause', () =>
             this.playTracker.updateCurrentTime(this.currentVideo.identifier, this.videoPlayer.currentTime()));
-        this.videoPlayer.on('loadedmetadata', (e, data) => {
+        this.videoPlayer.on('loadedmetadata', () => {
             if (this.currentVideo.history.currentTime
                 && this.currentVideo.duration
                 && (((this.currentVideo.history.currentTime ?? 0) / this.currentVideo.duration) < 0.995)) {
                 this.videoPlayer.currentTime(this.currentVideo.history.currentTime);
             }
         });
-    }
-
-    ngOnDestroy() {
-        this.idTokenSubscription.unsubscribe();
     }
 
     mergeVideoInfo(videos: CourseMembers, history: PlayHistory) {
