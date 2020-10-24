@@ -55,9 +55,12 @@ export class CoursePage implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit() {
-        // Override native HLS in Chrome Android, due to lack of support of playbackRate
-        const isChromeAndroid = /Chrome/.test(navigator.userAgent) && /Android/.test(navigator.userAgent);
-        this.videoPlayer = videojs(this.videoPlayerElement.nativeElement, isChromeAndroid ? {
+        const shouldOverrideNative =
+            // Override native HLS in Chrome Android, due to lack of support of playbackRate
+            (/Chrome/.test(navigator.userAgent) && /Android/.test(navigator.userAgent));
+            // also in desktop/iPad Safari, due to some HLS spec. incompatibility
+            // || (/Safari/.test(navigator.userAgent) && !/Mobile/.test(navigator.userAgent));
+        this.videoPlayer = videojs(this.videoPlayerElement.nativeElement, shouldOverrideNative ? {
             html5: {
                 hls: {
                     overrideNative: true
@@ -129,6 +132,9 @@ export class CoursePage implements OnInit, AfterViewInit {
         video.sources = video.sources.filter(source => {
             if (videojs.browser.IS_SAFARI
                 && (source.type.startsWith('application/dash+xml') || source.type.startsWith('video/webm'))) {
+                return false;
+            } else if (/Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent) && source.type.startsWith('application/x-mpegURL')) {
+                // Don't play HLS on Safari
                 return false;
             }
             return this.videoPlayerElement.nativeElement.canPlayType(
