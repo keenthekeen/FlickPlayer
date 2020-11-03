@@ -15,6 +15,7 @@ import {Subscription} from 'rxjs';
 export class WelcomePage implements OnInit, OnDestroy {
     isAuthChecked: boolean;
     authStateSubscription: Subscription;
+    isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
 
     constructor(
         private router: Router, public afAuth: AngularFireAuth,

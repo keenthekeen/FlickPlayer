@@ -1,5 +1,5 @@
 <ion-content class="ion-text-center ion-padding" color="light">
-    <ion-card>
+    <ion-card id="mainCard">
         <ion-card-header>
             <ion-card-title>MDCU Recorded Lecture</ion-card-title>
         </ion-card-header>
@@ -21,6 +21,11 @@
                     Sign in with Docchula
                 </ion-button>
             </ng-template>
+        </ion-card-content>
+    </ion-card>
+    <ion-card *ngIf="isSafari" color="warning" id="browserCard">
+        <ion-card-content>
+            Your browser may not be able to play some video. Please try again using Google Chrome or Mozilla Firefox on Windows/Linux/macOS/Android.
         </ion-card-content>
     </ion-card>
     <ion-text class="small-text" color="medium">The Student Union of the Faculty of Medicine, Chulalongkorn University</ion-text>

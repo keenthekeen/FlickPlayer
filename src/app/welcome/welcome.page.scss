@@ -1,7 +1,15 @@
 ion-content {
   ion-card {
     max-width: 450px;
+    margin: auto;
+  }
+
+  #mainCard {
     margin: 20vh auto 0.4rem auto;
+  }
+
+  #browserCard {
+    margin: 1rem auto 0.4rem auto;
   }
 
   .small-text {

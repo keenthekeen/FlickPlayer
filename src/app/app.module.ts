@@ -16,7 +16,7 @@ import {HttpClientModule} from '@angular/common/http';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import {AngularFireAnalyticsModule, DEBUG_MODE, UserTrackingService} from '@angular/fire/analytics';
 import {AngularFirePerformanceModule, INSTRUMENTATION_ENABLED} from '@angular/fire/performance';
-import {AngularFireRemoteConfigModule} from '@angular/fire/remote-config';
+import {AngularFireRemoteConfigModule, DEFAULTS} from '@angular/fire/remote-config';
 
 @NgModule({
   declarations: [AppComponent],
@@ -40,7 +40,8 @@ import {AngularFireRemoteConfigModule} from '@angular/fire/remote-config';
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     UserTrackingService,
     { provide: INSTRUMENTATION_ENABLED, useValue: environment.production },
-    { provide: DEBUG_MODE, useValue: !environment.production }
+    { provide: DEBUG_MODE, useValue: !environment.production },
+    { provide: DEFAULTS, useValue: environment.defaultRemoteConfig }
   ],
   bootstrap: [AppComponent]
 })
