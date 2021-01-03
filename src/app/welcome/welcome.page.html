@@ -23,7 +23,12 @@
             </ng-template>
         </ion-card-content>
     </ion-card>
-    <ion-card *ngIf="isSafari" color="warning" id="browserCard">
+    <ion-card *ngIf="isIAB" color="danger" class="browserCard">
+        <ion-card-content>
+            In-app browser is not supported. Please open this website in Safari/Chrome.
+        </ion-card-content>
+    </ion-card>
+    <ion-card *ngIf="isSafari" color="warning" class="browserCard">
         <ion-card-content>
             Your browser may not be able to play some video. Please try again using Google Chrome or Mozilla Firefox on Windows/Linux/macOS/Android.
         </ion-card-content>
