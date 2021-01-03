@@ -17,6 +17,7 @@
             <ion-col size="12" size-lg [hidden]="!currentVideo">
                 <video #videoPlayer class="video-js vjs-default-skin fullwidth" controls preload="metadata"
                        data-setup='{"aspectRatio":"1280:640", "playbackRates": [0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 3], "plugins": {"seekButtons": {"forward": 10, "back": 10}}}'
+                       [hidden]="currentVideo && currentVideo.sources.length === 0"
                        (contextmenu)="preventMouseEvent($event)" tabindex="1">
                     Your browser does not support the video tag.
                 </video>
@@ -63,7 +64,7 @@
                                 <span *ngIf="lecture.value.durationInMin">- {{ lecture.value.durationInMin}} min </span>
                                 <span *ngIf="lecture.value.history.currentTime && lecture.value.duration && lecture.value.history.currentTime > 3 && (lecture.value.history.currentTime/lecture.value.duration < 0.995)">
                                     - {{ (lecture.value.duration - lecture.value.history.currentTime) / 60 | number:'1.0-0'}} min left </span>
-                                <ion-icon *ngIf="lecture.value.attachments.length != 0" name="download" size="small" color="medium"></ion-icon>
+                                <ion-icon *ngIf="lecture.value.attachments.length != 0" name="document-attach-outline" size="small" color="medium"></ion-icon>
                             </small>
                             <ion-progress-bar
                                     *ngIf="lecture.value.history.currentTime && lecture.value.duration && lecture.value.history.currentTime > 3 && (lecture.value.history.currentTime/lecture.value.duration < 0.995)"
