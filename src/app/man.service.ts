@@ -67,16 +67,16 @@ export class ManService {
                 const identifierFragment = year + '/' + course + '/' + courseKey + '/';
                 thisLecture = {
                     ...thisLecture,
-                    sources: thisLecture.sources.map(source => {
+                    sources: thisLecture.sources ? thisLecture.sources.map(source => {
                         source.src = source.src
                             ?? ((source.server ?? server) + identifierFragment + source.path);
-                        source.src += (server.includes('?') ? '&key=' : '?key=') + encodeURIComponent(response.data.key);
+                        source.src += (source.src.includes('?') ? '&key=' : '?key=') + encodeURIComponent(response.data.key);
                         return source;
-                    }),
+                    }) : [],
                     attachments: thisLecture.attachments ? thisLecture.attachments.map(source => {
                         source.src = source.src
                             ?? ((source.server ?? server) + identifierFragment + source.path);
-                        source.src += (server.includes('?') ? '&key=' : '?key=') + encodeURIComponent(response.data.key);
+                        source.src += (source.src.includes('?') ? '&key=' : '?key=') + encodeURIComponent(response.data.key);
                         source.name = source.name ?? source.path.substr(3);
                         return source;
                     }) : [],
