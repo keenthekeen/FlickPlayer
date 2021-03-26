@@ -28,6 +28,8 @@ export class CoursePage implements OnInit, AfterViewInit {
         viewed: 0,
         duration: 0
     };
+    isAndroid = /Android/i.test(navigator.userAgent);
+    isIos = /iPad/i.test(navigator.userAgent) || /iPhone/i.test(navigator.userAgent);
 
     constructor(private route: ActivatedRoute, private router: Router,
                 private manService: ManService, private alertController: AlertController,
@@ -143,9 +145,6 @@ export class CoursePage implements OnInit, AfterViewInit {
             ) !== '';
         });
         this.videoPlayer.src(video.sources);
-        if (!/Android/i.test(navigator.userAgent)) {
-            video.sourceExternal = null;
-        }
         this.currentVideo = video;
         this.videoPlayerElement.nativeElement.focus();
     }

@@ -26,14 +26,17 @@
                         <p>
                             {{ currentVideo.title }} - {{ currentVideo.lecturer }}<br/>
                             <span class="ion-hide-md-down">
-                        <strong>Hotkeys</strong>&emsp; Space: Pause, ▲/▼: Volume, ◄/►: Seek, F: Fullscreen |
-                    </span>
+                                <strong>Hotkeys</strong>&emsp; Space: Pause, ▲/▼: Volume, ◄/►: Seek, F: Fullscreen |
+                            </span>
                             <a (click)="setPlaybackSpeed()">Set playback speed</a>
-                            <span *ngIf="currentVideo.sourceExternal">
-                        | <a [href]="sanitize('intent:'+currentVideo.sourceExternal+'#Intent;S.title='+encodeURIComponent(currentVideo.title)+';package=com.mxtech.videoplayer.ad;end')"
-                             rel="noreferrer">View with MX Player</a>
-                    </span>
-                        </p></ion-text>
+                            <span *ngIf="isAndroid && currentVideo.sourceExternal">
+                                | <a [href]="sanitize('intent:'+currentVideo.sourceExternal+'#Intent;S.title='+encodeURIComponent(currentVideo.title)+';package=com.mxtech.videoplayer.ad;end')" rel="noreferrer">Play with MX Player</a>
+                            </span>
+                            <span *ngIf="(isIos || isAndroid) && currentVideo.sourceExternal">
+                                | <a [href]="sanitize('vlc://'+currentVideo.sourceExternal)" rel="noreferrer">Play with VLC</a>
+                            </span>
+                        </p>
+                    </ion-text>
                     <ion-card *ngIf="currentVideo.sources.length === 0" color="warning">
                         <ion-card-header>
                             <ion-card-title>Format not supported</ion-card-title>
