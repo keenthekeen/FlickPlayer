@@ -7,6 +7,7 @@ import videojs from 'video.js';
 import 'videojs-seek-buttons';
 import 'videojs-hotkeys';
 import 'videojs-event-tracking';
+import 'videojs-youtube';
 import {AlertController} from '@ionic/angular';
 import {AngularFireAnalytics} from '@angular/fire/analytics';
 import {DomSanitizer} from '@angular/platform-browser';
@@ -62,15 +63,18 @@ export class CoursePage implements OnInit, AfterViewInit {
             (/Chrome/.test(navigator.userAgent) && /Android/.test(navigator.userAgent));
             // also in desktop/iPad Safari, due to some HLS spec. incompatibility
             // || (/Safari/.test(navigator.userAgent) && !/Mobile/.test(navigator.userAgent));
-        this.videoPlayer = videojs(this.videoPlayerElement.nativeElement, shouldOverrideNative ? {
-            html5: {
-                hls: {
-                    overrideNative: true
-                },
-                nativeAudioTracks: false,
-                nativeVideoTracks: false
-            }
-        } : {});
+        this.videoPlayer = videojs(this.videoPlayerElement.nativeElement, {
+            ...(shouldOverrideNative ? {
+                html5: {
+                    hls: {
+                        overrideNative: true
+                    },
+                    nativeAudioTracks: false,
+                    nativeVideoTracks: false
+                }
+            } : {}),
+            techOrder: ['html5', 'youtube']
+        });
 
         // Setup hot keys
         this.videoPlayer.ready(function() {
@@ -132,7 +136,9 @@ export class CoursePage implements OnInit, AfterViewInit {
 
     viewVideo(video: Lecture) {
         video.sources = video.sources.filter(source => {
-            if (videojs.browser.IS_SAFARI
+            if (source.type === 'video/youtube') {
+                return true;
+            } else if (videojs.browser.IS_SAFARI
                 && (source.type.startsWith('application/dash+xml') || source.type.startsWith('video/webm'))) {
                 return false;
             } else if (/Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent) && source.type.startsWith('application/x-mpegURL')) {

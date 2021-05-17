@@ -62,7 +62,7 @@ export class WelcomePage implements OnInit, OnDestroy {
     }
 
     goToHome() {
-        return new Promise(resolve => {
+        return new Promise<void>(resolve => {
             if (this.isAuthChecked) {
                 this.router.navigate(['home']);
             } else {
