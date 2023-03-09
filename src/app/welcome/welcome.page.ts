@@ -1,11 +1,12 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {AngularFireAuth} from '@angular/fire/auth';
+import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {AlertController, LoadingController} from '@ionic/angular';
 import {Router} from '@angular/router';
-import * as firebase from 'firebase/app';
 import {ManService} from '../man.service';
 import {HttpErrorResponse} from '@angular/common/http';
 import {Subscription} from 'rxjs';
+import firebase from 'firebase/compat/app';
+import {GoogleAuthProvider} from 'firebase/auth';
 
 @Component({
     selector: 'app-welcome',
@@ -52,7 +53,7 @@ export class WelcomePage implements OnInit, OnDestroy {
     }
 
     login() {
-        const provider = new firebase.auth.GoogleAuthProvider();
+        const provider = new GoogleAuthProvider();
         provider.setCustomParameters({hd: 'docchula.com'});
         this.afAuth.signInWithPopup(provider);
     }

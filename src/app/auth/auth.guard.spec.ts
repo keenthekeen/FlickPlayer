@@ -1,7 +1,7 @@
 import {inject, TestBed} from '@angular/core/testing';
 
 import {AuthGuard} from './auth.guard';
-import {AngularFireAuth} from '@angular/fire/auth';
+import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {FireAuthStub} from '../stubs';
 import {ManService, ManServiceStub} from '../man.service';
 import {RouterTestingModule} from '@angular/router/testing';

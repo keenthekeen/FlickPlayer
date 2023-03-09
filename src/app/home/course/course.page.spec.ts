@@ -2,12 +2,12 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
 
 import { CoursePage } from './course.page';
-import {AngularFireAuth} from '@angular/fire/auth';
+import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {ActivatedRouteStub, FireAnalyticsStub, FireAuthStub} from '../../stubs';
 import {ManService, ManServiceStub} from '../../man.service';
 import {RouterTestingModule} from '@angular/router/testing';
 import {PlayTrackerService, PlayTrackerServiceStub} from '../../play-tracker.service';
-import {AngularFireAnalytics} from '@angular/fire/analytics';
+import {AngularFireAnalytics} from '@angular/fire/compat/analytics';
 import {ActivatedRoute} from '@angular/router';
 
 describe('CoursePage', () => {

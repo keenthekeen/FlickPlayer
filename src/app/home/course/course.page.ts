@@ -9,7 +9,7 @@ import 'videojs-hotkeys';
 import 'videojs-event-tracking';
 import 'videojs-youtube';
 import {AlertController} from '@ionic/angular';
-import {AngularFireAnalytics} from '@angular/fire/analytics';
+import {AngularFireAnalytics} from '@angular/fire/compat/analytics';
 import {DomSanitizer} from '@angular/platform-browser';
 import {PlayHistory, PlayTrackerService} from '../../play-tracker.service';
 

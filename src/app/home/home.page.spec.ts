@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
 
 import { HomePage } from './home.page';
-import {AngularFireAuth} from '@angular/fire/auth';
+import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {FireAuthStub} from '../stubs';
 import {ManService, ManServiceStub} from '../man.service';
 import {RouterTestingModule} from '@angular/router/testing';

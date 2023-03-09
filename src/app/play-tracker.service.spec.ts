@@ -1,9 +1,9 @@
 import {TestBed} from '@angular/core/testing';
 
 import {PlayTrackerService} from './play-tracker.service';
-import {AngularFirestore} from '@angular/fire/firestore';
+import {AngularFirestore} from '@angular/fire/compat/firestore';
 import {FireAuthStub, FirestoreStub} from './stubs';
-import {AngularFireAuth} from '@angular/fire/auth';
+import {AngularFireAuth} from '@angular/fire/compat/auth';
 
 describe('PlayTrackerService', () => {
     beforeEach(() => TestBed.configureTestingModule({

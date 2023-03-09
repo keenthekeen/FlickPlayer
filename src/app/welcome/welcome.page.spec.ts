@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import {WelcomePage} from './welcome.page';
 import {RouterTestingModule} from '@angular/router/testing';
-import {AngularFireAuth} from '@angular/fire/auth';
+import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {FireAuthStub} from '../stubs';
 import {ManService, ManServiceStub} from '../man.service';
 

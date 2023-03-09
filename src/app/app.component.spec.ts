@@ -6,7 +6,7 @@ import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
 
 import { AppComponent } from './app.component';
-import {AngularFireRemoteConfig} from '@angular/fire/remote-config';
+import {AngularFireRemoteConfig} from '@angular/fire/compat/remote-config';
 import {FireRemoteConfigStub} from './stubs';
 
 describe('AppComponent', () => {

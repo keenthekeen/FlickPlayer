@@ -1,9 +1,9 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Observable, of} from 'rxjs';
-import {AngularFireAuth} from '@angular/fire/auth';
+import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {filter, map, tap, timeout} from 'rxjs/operators';
-import {AngularFireRemoteConfig} from '@angular/fire/remote-config';
+import {AngularFireRemoteConfig} from '@angular/fire/compat/remote-config';
 import {environment} from '../environments/environment';
 import {PlayHistoryValue} from './play-tracker.service';
 

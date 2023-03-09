@@ -1,12 +1,12 @@
 import {Injectable} from '@angular/core';
-import {AngularFirestore} from '@angular/fire/firestore';
-import {AngularFireAuth} from '@angular/fire/auth';
-import * as firebase from 'firebase/app';
-import 'firebase/firestore';
+import {AngularFirestore} from '@angular/fire/compat/firestore';
+import {AngularFireAuth} from '@angular/fire/compat/auth';
+import * as firebase from 'firebase/compat/app';
+import 'firebase/compat/firestore';
 import {map, take} from 'rxjs/operators';
 import {BehaviorSubject} from 'rxjs';
-import Timestamp = firebase.firestore.Timestamp;
-import FieldValue = firebase.firestore.FieldValue;
+import {Timestamp, FieldValue} from 'firebase/firestore';
+import {serverTimestamp} from '@angular/fire/firestore';
 
 @Injectable({
     providedIn: 'root'
@@ -49,7 +49,7 @@ export class PlayTrackerService {
             });
             newHistory[identifier] = {
                 currentTime: value,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                updatedAt: serverTimestamp()
             };
             return newHistory;
         })).subscribe(history => this.aFirestore.doc<UserDocument>(this.documentId).set({playHistory: history}));
