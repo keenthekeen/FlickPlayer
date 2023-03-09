@@ -6,7 +6,7 @@
         </ion-buttons>
         <ion-title>
             {{ course || 'Course'}}
-            <small *ngIf="courseProgress.duration > 0">{{ (courseProgress.duration-courseProgress.viewed)/ 60 | number:'1.0-0' }} min left</small>
+            <small *ngIf="courseProgress.duration > 0">{{ (courseProgress.duration-courseProgress.viewed)/ 3600 | number:'1.0-1' }} hours left</small>
         </ion-title>
     </ion-toolbar>
 </ion-header>
