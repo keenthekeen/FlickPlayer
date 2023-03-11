@@ -96,7 +96,7 @@ export class ManService {
     }
 
     changeEndpoint() {
-        this.endpoint.shift();
+        this.endpoint.push(this.endpoint.shift());
     }
 
     get<T>(path: string): Observable<T> {
