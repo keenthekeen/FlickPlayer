@@ -1,27 +1,27 @@
 import {Injectable} from '@angular/core';
-import {AngularFirestore} from '@angular/fire/compat/firestore';
-import {AngularFireAuth} from '@angular/fire/compat/auth';
-import 'firebase/compat/firestore';
-import {map, take} from 'rxjs/operators';
+import {distinctUntilKeyChanged, filter, map, take} from 'rxjs/operators';
 import {BehaviorSubject} from 'rxjs';
-import {Timestamp, FieldValue} from 'firebase/firestore';
-import {serverTimestamp} from '@angular/fire/firestore';
+import {
+    collection, doc, docData, DocumentReference, FieldValue, Firestore, FirestoreDataConverter, QueryDocumentSnapshot,
+    serverTimestamp, setDoc, SnapshotOptions, Timestamp
+} from '@angular/fire/firestore';
+import {AuthService} from './auth.service';
 
 @Injectable({
     providedIn: 'root'
 })
 export class PlayTrackerService {
     private readonly history$: BehaviorSubject<PlayHistory>;
-    private documentId: string;
+    private documentRef: DocumentReference<UserDocument>;
 
-    constructor(private aFirestore: AngularFirestore, afAuth: AngularFireAuth) {
+    constructor(private aFirestore: Firestore, authService: AuthService) {
         this.history$ = new BehaviorSubject({});
 
-        afAuth.user.pipe(take(1)).subscribe(user => {
-            this.documentId = 'users/' + user.uid;
-            aFirestore.doc<UserDocument>(this.documentId).valueChanges().subscribe(doc => {
-                if (doc) {
-                    this.history$.next(doc.playHistory ?? {});
+        authService.user.pipe(distinctUntilKeyChanged('uid')).subscribe(user => {
+            this.documentRef = doc(collection(aFirestore, 'users'), user.uid).withConverter(UserDocumentConverter);
+            docData(this.documentRef).subscribe(document => {
+                if (document) {
+                    this.history$.next(document.playHistory ?? {});
                 }
             });
         });
@@ -32,10 +32,10 @@ export class PlayTrackerService {
     }
 
     updateCurrentTime(identifier: string, value: number) {
-        if (!this.documentId) {
+        if (!this.documentRef || !value) {
             return;
         }
-        this.history$.pipe(take(1), map(history => {
+        this.history$.pipe(filter(v => Object.keys(v).length !== 0), take(1), map(history => {
             const newHistory = {};
             Object.keys(history).forEach(key => {
                 if (history[key].currentTime
@@ -51,13 +51,24 @@ export class PlayTrackerService {
                 updatedAt: serverTimestamp()
             };
             return newHistory;
-        })).subscribe(history => this.aFirestore.doc<UserDocument>(this.documentId).set({playHistory: history}));
+        })).subscribe(history => setDoc(this.documentRef, {playHistory: history}));
     }
 }
 
 export const PlayTrackerServiceStub: Partial<PlayTrackerService> = {
     retrieve: () => new BehaviorSubject<PlayHistory>({}),
-    updateCurrentTime: (identifier: string, value: number) => {}
+    updateCurrentTime: (identifier: string, value: number) => {
+    }
+};
+
+const UserDocumentConverter: FirestoreDataConverter<UserDocument> = {
+    toFirestore: (data: UserDocument) => data,
+    fromFirestore: (snapshot: QueryDocumentSnapshot, options: SnapshotOptions) => {
+        const data = snapshot.data(options);
+        return {
+            playHistory: data.playHistory
+        };
+    }
 };
 
 export interface UserDocument {

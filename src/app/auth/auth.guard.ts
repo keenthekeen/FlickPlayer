@@ -1,9 +1,8 @@
 import {Injectable} from '@angular/core';
 import {ActivatedRouteSnapshot, CanActivate, CanLoad, Route, Router, RouterStateSnapshot} from '@angular/router';
 import {Observable} from 'rxjs';
-import {AngularFireAuth} from '@angular/fire/compat/auth';
-import {first, map} from 'rxjs/operators';
-import {ManService} from '../man.service';
+import {filter, map} from 'rxjs/operators';
+import {AuthService} from '../auth.service';
 
 @Injectable({
     providedIn: 'root'
@@ -11,8 +10,7 @@ import {ManService} from '../man.service';
 export class AuthGuard implements CanActivate, CanLoad {
     public allowed: boolean;
 
-    constructor(private afAuth: AngularFireAuth, private router: Router, private manService: ManService) {
-
+    constructor(private authService: AuthService, private router: Router) {
     }
 
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
@@ -24,17 +22,6 @@ export class AuthGuard implements CanActivate, CanLoad {
     }
 
     isLoggedIn(): Observable<boolean> {
-        return this.afAuth.idToken.pipe(
-            first(),
-            map(u => {
-                if (u) {
-                    this.manService.setIdToken(u);
-                    return true;
-                } else {
-                    this.router.navigate(['/']);
-                    return false;
-                }
-            })
-        );
+        return this.authService.user.pipe(filter(v => v !== null), map(user => !!user));
     }
 }

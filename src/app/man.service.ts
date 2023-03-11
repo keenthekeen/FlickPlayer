@@ -1,11 +1,11 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Observable, of} from 'rxjs';
-import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {filter, map, tap, timeout} from 'rxjs/operators';
-import {AngularFireRemoteConfig} from '@angular/fire/compat/remote-config';
 import {environment} from '../environments/environment';
 import {PlayHistoryValue} from './play-tracker.service';
+import {getStringChanges, RemoteConfig} from '@angular/fire/remote-config';
+import {AuthService} from './auth.service';
 
 
 @Injectable({
@@ -13,7 +13,6 @@ import {PlayHistoryValue} from './play-tracker.service';
 })
 export class ManService {
     private videoList: CourseGroupList;
-    private idToken: string;
     private endpoint = ['https://flick-man-cf.docchula.com/', 'https://flick-man.docchula.com/'];
     private originalEndpoint = ['https://flick-man-cf.docchula.com/'];
     private httpOptions = {
@@ -22,15 +21,13 @@ export class ManService {
         })
     };
 
-    constructor(private http: HttpClient, private afAuth: AngularFireAuth,
-                remoteConfig: AngularFireRemoteConfig) {
+    constructor(private http: HttpClient, authService: AuthService,
+                remoteConfig: RemoteConfig) {
         // Get authentication data
-        this.afAuth.idToken.subscribe(token => {
-            this.setIdToken(token);
-        });
+        authService.idToken.subscribe(idToken => this.setIdToken(idToken));
         if (environment.production) {
             // Get endpoint config
-            remoteConfig.strings.manEndpoint.pipe(filter(v => !!v)).subscribe(v => {
+            getStringChanges(remoteConfig, 'manEndpoint').pipe(filter(v => !!v)).subscribe(v => {
                 const w = v.split(',');
                 this.endpoint = w;
                 this.originalEndpoint = w;
@@ -39,9 +36,7 @@ export class ManService {
     }
 
     setIdToken(idToken: string) {
-        this.idToken = idToken;
-        this.httpOptions.headers =
-            this.httpOptions.headers.set('Authorization', 'Bearer ' + idToken);
+        this.httpOptions.headers = this.httpOptions.headers.set('Authorization', 'Bearer ' + idToken);
     }
 
     getVideoList(): Observable<CourseGroupList> {
@@ -104,12 +99,15 @@ export class ManService {
         this.endpoint.shift();
     }
 
-    private getEndpointLocation(): string {
-        if (this.endpoint.length > 0) {
-            return this.endpoint[0];
+    get<T>(path: string): Observable<T> {
+        if (this.httpOptions.headers.get('Authorization').length < 30) {
+            console.error('ManService ID token is not set.');
+        } else if (!this.getEndpointLocation()) {
+            console.error('ManService endpoint is not set.');
         } else {
-            return this.originalEndpoint[0];
+            return this.http.get<T>(this.getEndpointLocation() + path, this.httpOptions);
         }
+        return of(null);
     }
 
     /*updateCurrentStudent(requestBody) {
@@ -119,13 +117,12 @@ export class ManService {
         return this.patch('students/' + this.email, requestBody);
     }*/
 
-    get<T>(path: string): Observable<T> {
-        if (this.httpOptions.headers.get('Authorization').length < 5) {
-            console.error('ManService ID token is not set.');
-        } else if (!this.getEndpointLocation()) {
-            console.error('ManService endpoint is not set.');
+    private getEndpointLocation(): string {
+        if (this.endpoint.length > 0) {
+            return this.endpoint[0];
+        } else {
+            return this.originalEndpoint[0];
         }
-        return this.http.get<T>(this.getEndpointLocation() + path, this.httpOptions);
     }
 
     /*patch(path: string, body): Observable<Object> {

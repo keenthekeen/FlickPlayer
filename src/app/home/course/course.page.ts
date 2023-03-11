@@ -9,9 +9,9 @@ import 'videojs-hotkeys';
 import 'videojs-event-tracking';
 import 'videojs-youtube';
 import {AlertController} from '@ionic/angular';
-import {AngularFireAnalytics} from '@angular/fire/compat/analytics';
 import {DomSanitizer} from '@angular/platform-browser';
 import {PlayHistory, PlayTrackerService} from '../../play-tracker.service';
+import {Analytics, logEvent} from '@angular/fire/analytics';
 import Player = videojs.Player;
 
 @Component({
@@ -35,7 +35,7 @@ export class CoursePage implements OnInit, AfterViewInit {
 
     constructor(private route: ActivatedRoute, private router: Router,
                 private manService: ManService, private alertController: AlertController,
-                private analytics: AngularFireAnalytics, private sanitizer: DomSanitizer,
+                private analytics: Analytics, private sanitizer: DomSanitizer,
                 private playTracker: PlayTrackerService) {
     }
 
@@ -62,8 +62,8 @@ export class CoursePage implements OnInit, AfterViewInit {
         const shouldOverrideNative =
             // Override native HLS in Chrome Android, due to lack of support of playbackRate
             (/Chrome/.test(navigator.userAgent) && /Android/.test(navigator.userAgent));
-            // also in desktop/iPad Safari, due to some HLS spec. incompatibility
-            // || (/Safari/.test(navigator.userAgent) && !/Mobile/.test(navigator.userAgent));
+        // also in desktop/iPad Safari, due to some HLS spec. incompatibility
+        // || (/Safari/.test(navigator.userAgent) && !/Mobile/.test(navigator.userAgent));
         this.videoPlayer = videojs(this.videoPlayerElement.nativeElement, {
             ...(shouldOverrideNative ? {
                 html5: {
@@ -79,7 +79,7 @@ export class CoursePage implements OnInit, AfterViewInit {
                 eventTracking: {
                     performance: (data) => {
                         if (this.videoPlayer.currentTime() > 30) {
-                            this.analytics.logEvent('video_performance', this.attachEventLabel(data, true));
+                            logEvent(this.analytics, 'video_performance', this.attachEventLabel(data, true));
                             this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime);
                         }
                     }
@@ -88,7 +88,7 @@ export class CoursePage implements OnInit, AfterViewInit {
         });
 
         // Setup hot keys
-        this.videoPlayer.ready(function() {
+        this.videoPlayer.ready(function () {
             this.hotkeys({
                 volumeStep: 0.1,
                 seekStep: 10,
@@ -98,7 +98,7 @@ export class CoursePage implements OnInit, AfterViewInit {
         });
 
         this.videoPlayer.on('tracking:firstplay', (e, data) =>
-            this.analytics.logEvent('video_firstplay', this.attachEventLabel(data)));
+            logEvent(this.analytics, 'video_firstplay', this.attachEventLabel(data)));
         this.videoPlayer.on('tracking:first-quarter', (e, data) =>
             this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime));
         this.videoPlayer.on('tracking:second-quarter', (e, data) =>

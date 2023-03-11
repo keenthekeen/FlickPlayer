@@ -2,8 +2,8 @@ import {Component, OnInit} from '@angular/core';
 import {Observable} from 'rxjs';
 import {ManService} from '../man.service';
 import {map} from 'rxjs/operators';
-import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {Router} from '@angular/router';
+import {AuthService} from '../auth.service';
 
 @Component({
     selector: 'app-home',
@@ -13,7 +13,7 @@ import {Router} from '@angular/router';
 export class HomePage implements OnInit {
     folderList$: Observable<string[]>;
 
-    constructor(private manService: ManService, private router: Router, private afAuth: AngularFireAuth) {
+    constructor(private manService: ManService, private router: Router, private authService: AuthService) {
     }
 
     ngOnInit() {
@@ -21,7 +21,7 @@ export class HomePage implements OnInit {
     }
 
     logout() {
-        this.afAuth.signOut().then(_ => {
+        this.authService.signOut().then(_ => {
             this.router.navigate(['/']);
         }).catch(e => console.log('Reject', e));
     }

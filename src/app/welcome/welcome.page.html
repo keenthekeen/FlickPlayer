@@ -5,7 +5,7 @@
         </ion-card-header>
         <ion-card-content>
 
-            <div *ngIf="afAuth.user | async as user; else loginMessage">
+            <div *ngIf="user else loginMessage">
                 <h2>Hello, {{ user.displayName }}!</h2><br/>
                 <ion-button expand="block" color="tertiary" (click)="goToHome()">
                     View Courses
