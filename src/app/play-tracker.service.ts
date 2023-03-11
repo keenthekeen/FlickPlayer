@@ -1,9 +1,19 @@
 import {Injectable} from '@angular/core';
-import {distinctUntilKeyChanged, filter, map, take} from 'rxjs/operators';
+import {filter, map, mergeMap, skipWhile, take} from 'rxjs/operators';
 import {BehaviorSubject} from 'rxjs';
 import {
-    collection, doc, docData, DocumentReference, FieldValue, Firestore, FirestoreDataConverter, QueryDocumentSnapshot,
-    serverTimestamp, setDoc, SnapshotOptions, Timestamp
+    collection,
+    doc,
+    docData,
+    DocumentReference,
+    FieldValue,
+    Firestore,
+    FirestoreDataConverter,
+    QueryDocumentSnapshot,
+    serverTimestamp,
+    setDoc,
+    SnapshotOptions,
+    Timestamp
 } from '@angular/fire/firestore';
 import {AuthService} from './auth.service';
 
@@ -17,13 +27,17 @@ export class PlayTrackerService {
     constructor(private aFirestore: Firestore, authService: AuthService) {
         this.history$ = new BehaviorSubject({});
 
-        authService.user.pipe(distinctUntilKeyChanged('uid')).subscribe(user => {
-            this.documentRef = doc(collection(aFirestore, 'users'), user.uid).withConverter(UserDocumentConverter);
-            docData(this.documentRef).subscribe(document => {
-                if (document) {
-                    this.history$.next(document.playHistory ?? {});
-                }
-            });
+        const documentRef$ = authService.user.pipe(map(user => {
+            // Convert to a DocumentReference
+            return user ? doc(collection(aFirestore, 'users'), user.uid).withConverter(UserDocumentConverter) : null;
+        }));
+        documentRef$.subscribe(documentRef => {
+            this.documentRef = documentRef;
+        });
+        documentRef$.pipe(skipWhile(v => v == null), mergeMap(documentRef => docData(documentRef))).subscribe(document => {
+            if (document) {
+                this.history$.next(document.playHistory ?? {});
+            }
         });
     }
 

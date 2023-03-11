@@ -6,7 +6,6 @@ import {HttpErrorResponse} from '@angular/common/http';
 import {Subscription} from 'rxjs';
 import {User} from '@angular/fire/auth';
 import {AuthService} from '../auth.service';
-import {distinctUntilKeyChanged} from 'rxjs/operators';
 
 @Component({
     selector: 'app-welcome',
@@ -32,29 +31,36 @@ export class WelcomePage implements OnInit, OnDestroy {
             duration: 7000
         }).then(loading => {
             loading.present();
-            this.authStateSubscription = this.authService.user.pipe(distinctUntilKeyChanged('uid')).subscribe((user) => {
+            this.authStateSubscription = this.authService.user.subscribe((user) => {
                 this.user = user;
                 if (user) {
                     // User is signed in.
-                    this.manService.checkAuthorization().toPromise().then((result) => {
-                        if (result) {
-                            this.isAuthChecked = true;
-                            this.goToHome().then(_ => {
-                                loading.dismiss();
+                    if (!this.isAuthChecked) {
+                        user.getIdToken().then(idToken => {
+                            this.manService.setIdToken(idToken);
+                            this.manService.checkAuthorization().toPromise().then((result) => {
+                                if (result) {
+                                    this.isAuthChecked = true;
+                                    this.goToHome().then(_ => {
+                                        loading.dismiss();
+                                    });
+                                }
+                            }, (reason: HttpErrorResponse) => {
+                                if (reason instanceof ErrorEvent) {
+                                    this.alertError('Client Error', 'Please check your network connection.');
+                                } else if (reason.status === 401) {
+                                    this.alertError('Unregistered!', 'You are not allowed to access this website.');
+                                } else if ([500, 502, 503, 504].includes(reason.status)) {
+                                    this.alertError('Server Error', 'Please contact administrator.');
+                                } else {
+                                    this.manService.changeEndpoint();
+                                    this.alertError('Connection Error', 'Unable to reach server. You may try again.');
+                                }
                             });
-                        }
-                    }, (reason: HttpErrorResponse) => {
-                        if (reason instanceof ErrorEvent) {
-                            this.alertError('Client Error', 'Please check your network connection.');
-                        } else if (reason.status === 401) {
-                            this.alertError('Unregistered!', 'You are not allowed to access this website.');
-                        } else if (reason.status === 500 || reason.status === 502 || reason.status === 503 || reason.status === 504) {
-                            this.alertError('Server Error', 'Please contact administrator.');
-                        } else {
-                            this.manService.changeEndpoint();
-                            this.alertError('Connection Error', 'Unable to reach server. You may try again.');
-                        }
-                    });
+                        });
+                    }
+                } else {
+                    this.isAuthChecked = false;
                 }
                 loading.dismiss();
             });

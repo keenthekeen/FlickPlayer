@@ -6,17 +6,22 @@ import {BehaviorSubject} from 'rxjs';
     providedIn: 'root'
 })
 export class AuthService {
-    private readonly idTokenSubject = new BehaviorSubject<string>(null);
+    private readonly idTokenSubject = new BehaviorSubject<string|null>(null);
     public readonly idToken = this.idTokenSubject.asObservable();
-    private readonly userSubject = new BehaviorSubject<User>(null);
+    private readonly userSubject = new BehaviorSubject<User|null>(null);
     public readonly user = this.userSubject.asObservable();
 
     constructor(private afAuth: Auth) {
         onIdTokenChanged(afAuth, user => {
-            this.userSubject.next(user);
-            user.getIdToken().then(idToken => {
-                this.idTokenSubject.next(idToken);
-            });
+            if (user != null) {
+                this.userSubject.next(user);
+                user.getIdToken().then(idToken => {
+                    this.idTokenSubject.next(idToken);
+                });
+            } else {
+                this.userSubject.next(null);
+                this.idTokenSubject.next(null);
+            }
         });
     }
 
