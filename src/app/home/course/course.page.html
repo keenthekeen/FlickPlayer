@@ -1,8 +1,8 @@
 <link rel="stylesheet" href="course.page.scss">
 <ion-header>
     <ion-toolbar>
-        <ion-buttons slot="start" routerLink="..">
-            <ion-back-button defaultHref=".."></ion-back-button>
+        <ion-buttons slot="start" [routerLink]="'/home/'+year">
+            <ion-back-button [defaultHref]="'/home/'+year"></ion-back-button>
         </ion-buttons>
         <ion-title>
             {{ course || 'Course'}}
