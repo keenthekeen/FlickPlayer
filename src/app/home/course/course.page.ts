@@ -12,6 +12,7 @@ import {AlertController} from '@ionic/angular';
 import {AngularFireAnalytics} from '@angular/fire/compat/analytics';
 import {DomSanitizer} from '@angular/platform-browser';
 import {PlayHistory, PlayTrackerService} from '../../play-tracker.service';
+import Player = videojs.Player;
 
 @Component({
     selector: 'app-course',
@@ -20,7 +21,7 @@ import {PlayHistory, PlayTrackerService} from '../../play-tracker.service';
 })
 export class CoursePage implements OnInit, AfterViewInit {
     @ViewChild('videoPlayer') videoPlayerElement: ElementRef;
-    videoPlayer: any;
+    videoPlayer: Player;
     currentVideo: Lecture;
     year: string;
     course: string;
@@ -73,7 +74,17 @@ export class CoursePage implements OnInit, AfterViewInit {
                     nativeVideoTracks: false
                 }
             } : {}),
-            techOrder: ['html5', 'youtube']
+            techOrder: ['html5', 'youtube'],
+            plugins: {
+                eventTracking: {
+                    performance: (data) => {
+                        if (this.videoPlayer.currentTime() > 30) {
+                            this.analytics.logEvent('video_performance', this.attachEventLabel(data, true));
+                            this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime);
+                        }
+                    }
+                }
+            }
         });
 
         // Setup hot keys
@@ -86,15 +97,6 @@ export class CoursePage implements OnInit, AfterViewInit {
             });
         });
 
-        // Setup video analytics
-        this.videoPlayer.eventTracking({
-            performance: (data) => {
-                if (this.videoPlayer.currentTime() > 30) {
-                    this.analytics.logEvent('video_performance', this.attachEventLabel(data, true));
-                    this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime);
-                }
-            }
-        });
         this.videoPlayer.on('tracking:firstplay', (e, data) =>
             this.analytics.logEvent('video_firstplay', this.attachEventLabel(data)));
         this.videoPlayer.on('tracking:first-quarter', (e, data) =>
@@ -163,7 +165,8 @@ export class CoursePage implements OnInit, AfterViewInit {
                     name: 'speed',
                     type: 'number',
                     min: 0.5,
-                    max: 8
+                    max: 8,
+                    value: this.videoPlayer.playbackRate().toFixed(2)
                 }
             ],
             buttons: [
@@ -201,8 +204,8 @@ export class CoursePage implements OnInit, AfterViewInit {
         return encodeURIComponent(url);
     }
 
-    lectureById(index: number, lecture: Lecture) {
-        return lecture.identifier;
+    lectureById(index: number, lecture: { key: any, value: Lecture }) {
+        return lecture.value.identifier;
     }
 
     protected attachEventLabel(data, isNonInteraction ?: boolean) {

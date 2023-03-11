@@ -12,7 +12,7 @@ import {PlayHistoryValue} from './play-tracker.service';
     providedIn: 'root'
 })
 export class ManService {
-    private videoList: object;
+    private videoList: CourseGroupList;
     private idToken: string;
     private endpoint = ['https://flick-man-cf.docchula.com/', 'https://flick-man.docchula.com/'];
     private originalEndpoint = ['https://flick-man-cf.docchula.com/'];
@@ -44,8 +44,8 @@ export class ManService {
             this.httpOptions.headers.set('Authorization', 'Bearer ' + idToken);
     }
 
-    getVideoList(): Observable<object> {
-        return this.videoList ? of(this.videoList) : this.get<JSend<{ years: object }>>('v1/video').pipe(map(response => {
+    getVideoList(): Observable<CourseGroupList> {
+        return this.videoList ? of(this.videoList) : this.get<JSend<{ years: CourseGroupList }>>('v1/video').pipe(map(response => {
             return response.data.years;
         }), tap(a => {
             this.videoList = a;
@@ -77,11 +77,11 @@ export class ManService {
                         source.src = source.src
                             ?? ((source.server ?? server) + identifierFragment + source.path);
                         source.src += (source.src.includes('?') ? '&key=' : '?key=') + encodeURIComponent(response.data.key);
-                        source.name = source.name ?? source.path.substr(3);
+                        source.name = source.name ?? source.path.substring(3);
                         return source;
                     }) : [],
                     identifier: thisLecture.identifier
-                        ?? (year.substr(0, 3).trim() + '/' + course.substr(0, 7).trim() + '/' + courseKey),
+                        ?? (year.substring(0, 3).trim() + '/' + course.substring(0, 7).trim() + '/' + courseKey),
                     durationInMin: thisLecture.duration ? Math.round(thisLecture.duration / 60) : 0
                 };
                 for (const source of thisLecture.sources) {
@@ -147,6 +147,10 @@ export interface CourseMembers {
     [key: string]: Lecture;
 }
 
+export interface CourseGroupList {
+    [key: string]: string[];
+}
+
 export interface Lecture {
     title: string;
     lecturer: string;
@@ -156,7 +160,7 @@ export interface Lecture {
         path: string,
         type: string,
         server: string | null,
-        src?: string
+        src: string
     }[];
     attachments: {
         server: string | null,

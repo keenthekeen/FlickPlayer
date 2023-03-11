@@ -11,7 +11,7 @@ import {Router} from '@angular/router';
     styleUrls: ['home.page.scss']
 })
 export class HomePage implements OnInit {
-    folderList$: Observable<object>;
+    folderList$: Observable<string[]>;
 
     constructor(private manService: ManService, private router: Router, private afAuth: AngularFireAuth) {
     }

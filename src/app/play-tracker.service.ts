@@ -1,7 +1,6 @@
 import {Injectable} from '@angular/core';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
 import {AngularFireAuth} from '@angular/fire/compat/auth';
-import * as firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
 import {map, take} from 'rxjs/operators';
 import {BehaviorSubject} from 'rxjs';

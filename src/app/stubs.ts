@@ -41,6 +41,6 @@ export const FireRemoteConfigStub = {
 export const FirestoreStub = {
     doc: (id: string) => ({
         valueChanges: () => new BehaviorSubject({playHistory: {}}),
-        set: (d: any) => new Promise((resolve, reject) => resolve())
+        set: (d: any) => new Promise<void>((resolve, reject) => resolve())
     })
 };
