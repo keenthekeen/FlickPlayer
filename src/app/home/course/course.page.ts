@@ -83,18 +83,18 @@ export class CoursePage implements OnInit, AfterViewInit {
                             this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime);
                         }
                     }
+                },
+                hotkeys: {
+                    volumeStep: 0.1,
+                    seekStep: 10,
+                    enableModifiersForNumbers: false,
+                    enableVolumeScroll: false
+                },
+                seekButtons: {
+                    forward: 15,
+                    back: 10
                 }
             }
-        });
-
-        // Setup hot keys
-        this.videoPlayer.ready(function () {
-            this.hotkeys({
-                volumeStep: 0.1,
-                seekStep: 10,
-                enableModifiersForNumbers: false,
-                enableVolumeScroll: false
-            });
         });
 
         this.videoPlayer.on('tracking:firstplay', (e, data) =>
