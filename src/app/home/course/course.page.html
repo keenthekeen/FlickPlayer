@@ -5,8 +5,11 @@
             <ion-back-button [defaultHref]="'/home/'+year"></ion-back-button>
         </ion-buttons>
         <ion-title>
-            {{ course || 'Course'}}
-            <small *ngIf="courseProgress.duration > 0">{{ (courseProgress.duration-courseProgress.viewed)/ 3600 | number:'1.0-1' }} hours left</small>
+            {{ course ? course.replace(' [E-Learning]', '') : 'Course' }}
+            <span class="e-learning-tag" *ngIf="course && course.endsWith(' [E-Learning]')">
+                MDCU <small>E-Learning</small>
+            </span>
+            <small *ngIf="courseProgress.duration > 0">{{ (courseProgress.duration - courseProgress.viewed) / 3600 | number:'1.0-1' }} hours left</small>
         </ion-title>
     </ion-toolbar>
 </ion-header>
@@ -60,7 +63,8 @@
             </ion-col>
             <ion-col size="12" size-lg>
                 <ion-list *ngIf="list$ | async as list">
-                    <ion-item button *ngFor="let lecture of list | keyvalue trackBy: lectureById" (click)="viewVideo(lecture.value)">
+                    <ion-item button *ngFor="let lecture of list | keyvalue trackBy: lectureById" (click)="viewVideo(lecture.value)"
+                              [color]="(currentVideo && currentVideo.id && currentVideo.id === lecture.value.id) ? 'secondary' : ''">
                         <ion-label class="ion-text-wrap">
                             <span *ngIf="lecture.value.date">{{ lecture.value.date | date:"d MMM y" }} - </span>
                             {{ lecture.value.title }}

@@ -26,3 +26,14 @@
 @import "~@ionic/angular/css/flex-utils.css";
 
 @import "~video.js/dist/video-js.css";
+
+.e-learning-tag {
+  margin-right: 0.2em;
+  padding: 0.15em 0.2em;
+  font-size: 0.8em;
+  border: #aaaaaa solid 1px;
+  border-radius: 2px;
+  background-color: #f9f9f9;
+  color: #aaaaaa;
+  display: inline-block;
+}

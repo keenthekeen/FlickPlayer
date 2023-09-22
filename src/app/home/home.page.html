@@ -15,8 +15,8 @@
 <ion-content [fullscreen]="true">
     <ion-grid *ngIf="folderList$ | async as folderList">
         <ion-row>
-            <ion-col *ngFor="let folder of folderList">
-                <ion-card [routerLink]="folder">
+            <ion-col size-xs="6" size-sm="4" size-md="3" size-lg="2" *ngFor="let folder of folderList">
+                <ion-card [routerLink]="folder" [ngStyle]="{'background-color': colorByFolderName(folder)}">
                     <ion-card-header>
                         <ion-card-title>{{ folder }}</ion-card-title>
                     </ion-card-header>

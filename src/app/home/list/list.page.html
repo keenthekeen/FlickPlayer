@@ -3,14 +3,21 @@
         <ion-buttons slot="start" routerLink="/home">
             <ion-back-button defaultHref="/home"></ion-back-button>
         </ion-buttons>
-        <ion-title>{{ year || 'Loading'}}</ion-title>
+        <ion-title>
+            <span [ngStyle]="{'background-color': colorByFolderName(year)}">{{ year || 'Loading'}}</span>
+        </ion-title>
     </ion-toolbar>
 </ion-header>
 
 <ion-content>
     <ion-list *ngIf="list$ | async as list">
         <ion-item button *ngFor="let course of list" [routerLink]="course">
-            <ion-label>{{ course }}</ion-label>
+            <ion-label>
+                <span class="e-learning-tag" *ngIf="course.endsWith(' [E-Learning]')">
+                    MDCU <small>E-Learning</small>
+                </span>
+                {{ course.replace(' [E-Learning]', '') }}
+            </ion-label>
         </ion-item>
     </ion-list>
 </ion-content>

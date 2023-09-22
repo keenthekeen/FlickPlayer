@@ -4,6 +4,7 @@ import {ManService} from '../man.service';
 import {map} from 'rxjs/operators';
 import {Router} from '@angular/router';
 import {AuthService} from '../auth.service';
+import {colorByFolderName} from '../../helpers';
 
 @Component({
     selector: 'app-home',
@@ -25,4 +26,6 @@ export class HomePage implements OnInit {
             this.router.navigate(['/']);
         }).catch(e => console.log('Reject', e));
     }
+
+    protected readonly colorByFolderName = colorByFolderName;
 }

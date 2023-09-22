@@ -152,7 +152,8 @@ export interface Lecture {
     title: string;
     lecturer: string;
     date: string | null;
-    identifier?: string;
+    id?: string; // Server-side ID
+    identifier?: string; // Client-side ID, deprecated
     sources: {
         path: string,
         type: string,

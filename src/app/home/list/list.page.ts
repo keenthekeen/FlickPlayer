@@ -3,6 +3,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {EMPTY, Observable} from 'rxjs';
 import {map, switchMap} from 'rxjs/operators';
 import {ManService} from '../../man.service';
+import {colorByFolderName} from '../../../helpers';
 
 @Component({
     selector: 'app-list',
@@ -32,4 +33,5 @@ export class ListPage implements OnInit {
         );
     }
 
+    protected readonly colorByFolderName = colorByFolderName;
 }
