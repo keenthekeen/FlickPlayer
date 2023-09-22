@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import { ActivatedRouteSnapshot, Route, Router, RouterStateSnapshot } from '@angular/router';
+import {Router} from '@angular/router';
 import {Observable} from 'rxjs';
 import {filter, map} from 'rxjs/operators';
 import {AuthService} from '../auth.service';
@@ -7,17 +7,19 @@ import {AuthService} from '../auth.service';
 @Injectable({
     providedIn: 'root'
 })
-export class AuthGuard  {
+export class AuthGuard {
     public allowed: boolean;
 
     constructor(private authService: AuthService, private router: Router) {
     }
 
-    canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
+    canActivate(): Observable<boolean> {
+        // available parameters: route: ActivatedRouteSnapshot, state: RouterStateSnapshot
         return this.isLoggedIn();
     }
 
-    canLoad(route: Route): boolean | Observable<boolean> | Promise<boolean> {
+    canLoad(): boolean | Observable<boolean> | Promise<boolean> {
+        // available parameters: route: Route
         return this.isLoggedIn();
     }
 

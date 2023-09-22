@@ -35,7 +35,7 @@ export class WelcomePage implements OnInit, OnDestroy {
                 this.user = user;
                 if (user) {
                     // User is signed in.
-                    this.goToHome().then(_ => {
+                    this.goToHome().then(() => {
                         loading.dismiss();
                     });
                 } else {

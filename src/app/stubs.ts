@@ -21,7 +21,7 @@ class MockActivatedRoute {
 export const ActivatedRouteStub = new MockActivatedRoute(new MockActivatedRoute());
 
 export const FireAnalyticsStub = {
-    logEvent: (eventName: string, params?: { [key: string]: any }) => {
+    logEvent: (eventName: string, params?: object) => {
     }
 };
 
@@ -41,6 +41,6 @@ export const FireRemoteConfigStub = {
 export const FirestoreStub = {
     doc: (id: string) => ({
         valueChanges: () => new BehaviorSubject({playHistory: {}}),
-        set: (d: any) => new Promise<void>((resolve, reject) => resolve())
+        set: (d: object) => new Promise<void>((resolve, reject) => resolve())
     })
 };

@@ -18,7 +18,7 @@ import {getAuth, provideAuth} from '@angular/fire/auth';
 import {getAnalytics, provideAnalytics} from '@angular/fire/analytics';
 import {getPerformance, providePerformance} from '@angular/fire/performance';
 import {getRemoteConfig, provideRemoteConfig} from '@angular/fire/remote-config';
-import {enableIndexedDbPersistence, getFirestore, provideFirestore} from '@angular/fire/firestore';
+import {getFirestore, provideFirestore} from '@angular/fire/firestore';
 
 @NgModule({
     declarations: [AppComponent],

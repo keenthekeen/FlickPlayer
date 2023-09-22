@@ -28,7 +28,7 @@
                             <span class="ion-hide-md-down">
                                 <strong>Hotkeys</strong>&emsp; Space: Pause, ▲/▼: Volume, ◄/►: Seek, F: Fullscreen |
                             </span>
-                            <a (click)="setPlaybackSpeed()">Set playback speed</a>
+                            <a (click)="setPlaybackSpeed()" (keyup)="setPlaybackSpeed()" tabindex="0">Set playback speed</a>
                             <span *ngIf="isAndroid && currentVideo.sourceExternal">
                                 | <a [href]="sanitize('intent:'+currentVideo.sourceExternal+'#Intent;S.title='+encodeURIComponent(currentVideo.title)+';package=com.mxtech.videoplayer.ad;end')" rel="noreferrer">Play with MX Player</a>
                             </span>
@@ -45,13 +45,15 @@
                             Your browser can't play this video. Please try again using Google Chrome or Mozilla Firefox on Windows/Linux/macOS/Android.
                         </ion-card-content>
                     </ion-card>
-                    <ion-list *ngIf="currentVideo.attachments.length != 0">
+                    <ion-list *ngIf="currentVideo.attachments.length !== 0">
                         <ion-list-header lines="inset">
                             <ion-label>Attachments</ion-label>
                         </ion-list-header>
                         <ion-item *ngFor="let attachment of currentVideo.attachments">
                             <ion-label>{{ attachment.name }}</ion-label>
-                            <a [href]="attachment.src" download target="_blank"><ion-icon name="download" size="small" slot="end"></ion-icon></a>
+                            <a [href]="attachment.src" download target="_blank">
+                                <ion-icon name="download" size="small" slot="end"></ion-icon>
+                            </a>
                         </ion-item>
                     </ion-list>
                 </ng-container>
@@ -67,7 +69,7 @@
                                 <span *ngIf="lecture.value.durationInMin">- {{ lecture.value.durationInMin}} min </span>
                                 <span *ngIf="lecture.value.history.currentTime && lecture.value.duration && lecture.value.history.currentTime > 3 && (lecture.value.history.currentTime/lecture.value.duration < 0.995)">
                                     - {{ (lecture.value.duration - lecture.value.history.currentTime) / 60 | number:'1.0-0'}} min left </span>
-                                <ion-icon *ngIf="lecture.value.attachments.length != 0" name="document-attach-outline" size="small" color="medium"></ion-icon>
+                                <ion-icon *ngIf="lecture.value.attachments.length !== 0" name="document-attach-outline" size="small" color="medium"></ion-icon>
                             </small>
                             <ion-progress-bar
                                     *ngIf="lecture.value.history.currentTime && lecture.value.duration && lecture.value.history.currentTime > 3 && (lecture.value.history.currentTime/lecture.value.duration < 0.995)"

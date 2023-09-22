@@ -21,7 +21,7 @@ export class HomePage implements OnInit {
     }
 
     logout() {
-        this.authService.signOut().then(_ => {
+        this.authService.signOut().then(() => {
             this.router.navigate(['/']);
         }).catch(e => console.log('Reject', e));
     }

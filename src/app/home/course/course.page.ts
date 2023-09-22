@@ -204,7 +204,7 @@ export class CoursePage implements OnInit, AfterViewInit {
         return encodeURIComponent(url);
     }
 
-    lectureById(index: number, lecture: { key: any, value: Lecture }) {
+    lectureById(index: number, lecture: { key: string, value: Lecture }) {
         return lecture.value.identifier;
     }
 
