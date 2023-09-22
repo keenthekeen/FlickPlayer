@@ -45,7 +45,7 @@ export class PlayTrackerService {
         return this.history$;
     }
 
-    updateCurrentTime(identifier: string, value: number) {
+    updateCurrentTime(identifier: string, value: number, duration?: number) {
         if (!this.documentRef || !value) {
             return;
         }
@@ -55,14 +55,16 @@ export class PlayTrackerService {
                 if (history[key].currentTime
                     && history[key].currentTime > 3
                     // @ts-ignore
-                    && (Date.now() - +history[key].updatedAt.toDate()) <= 10368000000) {
-                    // Store for 120 days
+                    && (Date.now() - +history[key].updatedAt.toDate()) <= 20736000000) {
+                    // Store for 240 days
+                    // Store for 240 days
                     newHistory[key] = history[key];
                 }
             });
             newHistory[identifier] = {
                 currentTime: value,
-                updatedAt: serverTimestamp()
+                updatedAt: serverTimestamp(),
+                duration: duration ?? 0,
             };
             return newHistory;
         })).subscribe(history => setDoc(this.documentRef, {playHistory: history}));
@@ -71,7 +73,7 @@ export class PlayTrackerService {
 
 export const PlayTrackerServiceStub: Partial<PlayTrackerService> = {
     retrieve: () => new BehaviorSubject<PlayHistory>({}),
-    updateCurrentTime: (identifier: string, value: number) => {
+    updateCurrentTime: (identifier: string, value: number, duration?: number) => {
     }
 };
 
@@ -94,6 +96,7 @@ export interface PlayHistory {
 }
 
 export interface PlayHistoryValue {
+    duration: number | null;
     currentTime: number | null;
     updatedAt: Timestamp | FieldValue | null;
 }

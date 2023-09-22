@@ -100,19 +100,18 @@ export class CoursePage implements OnInit, AfterViewInit {
         this.videoPlayer.on('tracking:firstplay', (e, data) =>
             logEvent(this.analytics, 'video_firstplay', this.attachEventLabel(data)));
         this.videoPlayer.on('tracking:first-quarter', (e, data) =>
-            this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime));
+            this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime, data.duration));
         this.videoPlayer.on('tracking:second-quarter', (e, data) =>
-            this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime));
+            this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime, data.duration));
         this.videoPlayer.on('tracking:third-quarter', (e, data) =>
-            this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime));
+            this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime, data.duration));
         this.videoPlayer.on('tracking:fourth-quarter', (e, data) =>
-            this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime));
+            this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime, data.duration));
         this.videoPlayer.on('tracking:pause', () =>
-            this.playTracker.updateCurrentTime(this.currentVideo.identifier, this.videoPlayer.currentTime()));
+            this.playTracker.updateCurrentTime(this.currentVideo.identifier, this.videoPlayer.currentTime(), this.videoPlayer.duration()));
         this.videoPlayer.on('loadedmetadata', () => {
             if (this.currentVideo.history.currentTime
-                && this.currentVideo.duration
-                && (((this.currentVideo.history.currentTime ?? 0) / this.currentVideo.duration) < 0.995)) {
+                && (!this.currentVideo.duration || (((this.currentVideo.history.currentTime ?? 0) / this.currentVideo.duration) < 0.995))) {
                 this.videoPlayer.currentTime(this.currentVideo.history.currentTime);
             }
         });
@@ -124,7 +123,11 @@ export class CoursePage implements OnInit, AfterViewInit {
             duration: 0
         };
         Object.keys(videos).forEach(lectureKey => {
-            videos[lectureKey].history = history[videos[lectureKey].identifier] ?? {currentTime: null, updatedAt: null};
+            videos[lectureKey].history = history[videos[lectureKey].identifier] ?? {currentTime: null, updatedAt: null, duration: null};
+            if (!videos[lectureKey].duration && videos[lectureKey].history.duration) {
+                videos[lectureKey].duration = videos[lectureKey].history.duration;
+                videos[lectureKey].durationInMin = videos[lectureKey].duration ? Math.round(videos[lectureKey].duration / 60) : 0
+            }
             if (videos[lectureKey].duration) {
                 progress.duration -= -videos[lectureKey].duration;
                 if (videos[lectureKey].history.currentTime) {
