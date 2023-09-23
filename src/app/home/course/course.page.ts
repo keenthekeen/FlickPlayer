@@ -80,7 +80,7 @@ export class CoursePage implements OnInit, AfterViewInit {
                     performance: (data) => {
                         if (this.videoPlayer.currentTime() > 30) {
                             logEvent(this.analytics, 'video_performance', this.attachEventLabel(data, true));
-                            this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime);
+                            this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime, this.year, this.course);
                         }
                     }
                 },
@@ -97,18 +97,18 @@ export class CoursePage implements OnInit, AfterViewInit {
             }
         });
 
-        this.videoPlayer.on('tracking:firstplay', (e, data) =>
+        this.videoPlayer.on('tracking:firstplay', (_e, data) =>
             logEvent(this.analytics, 'video_firstplay', this.attachEventLabel(data)));
-        this.videoPlayer.on('tracking:first-quarter', (e, data) =>
-            this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime, data.duration));
-        this.videoPlayer.on('tracking:second-quarter', (e, data) =>
-            this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime, data.duration));
-        this.videoPlayer.on('tracking:third-quarter', (e, data) =>
-            this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime, data.duration));
-        this.videoPlayer.on('tracking:fourth-quarter', (e, data) =>
-            this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime, data.duration));
+        this.videoPlayer.on('tracking:first-quarter', (_e, data) =>
+            this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime, this.year, this.course, data.duration));
+        this.videoPlayer.on('tracking:second-quarter', (_e, data) =>
+            this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime, this.year, this.course, data.duration));
+        this.videoPlayer.on('tracking:third-quarter', (_e, data) =>
+            this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime, this.year, this.course, data.duration));
+        this.videoPlayer.on('tracking:fourth-quarter', (_e, data) =>
+            this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime, this.year, this.course, data.duration));
         this.videoPlayer.on('tracking:pause', () =>
-            this.playTracker.updateCurrentTime(this.currentVideo.identifier, this.videoPlayer.currentTime(), this.videoPlayer.duration()));
+            this.playTracker.updateCurrentTime(this.currentVideo.identifier, this.videoPlayer.currentTime(), this.year, this.course, this.videoPlayer.duration()));
         this.videoPlayer.on('loadedmetadata', () => {
             if (this.currentVideo.history.currentTime
                 && (!this.currentVideo.duration || (((this.currentVideo.history.currentTime ?? 0) / this.currentVideo.duration) < 0.995))) {

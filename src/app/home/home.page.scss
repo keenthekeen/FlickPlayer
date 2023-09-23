@@ -6,8 +6,17 @@ ion-card-title {
   color: white;
 }
 
+.course-name {
+  color: #222222;
+}
+
 p {
   padding: 0 1.5rem 0 1.5rem;
   color: gray;
   text-align: center;
+
+  ion-icon {
+    margin: 0 0.6em;
+    cursor: pointer;
+  }
 }

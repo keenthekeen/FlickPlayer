@@ -24,5 +24,11 @@
             </ion-col>
         </ion-row>
     </ion-grid>
+    <div *ngIf="lastVideo$ | async as lastVideo">
+        <p *ngIf="lastVideo.course">
+            Last played: <span class="course-name">{{ lastVideo.course }}</span>
+            <ion-icon tabindex="0" name="play" (click)="goToLastVideo(lastVideo)"></ion-icon>
+        </p>
+    </div>
     <p>Content are provided for MDCU students only. You may not copy, reproduce, distribute, publish, display, create derivative works, transmit, or in any way exploit any such content.</p>
 </ion-content>

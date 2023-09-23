@@ -24,7 +24,7 @@ export class PlayTrackerService {
     private readonly history$: BehaviorSubject<PlayHistory>;
     private documentRef: DocumentReference<UserDocument>;
 
-    constructor(private aFirestore: Firestore, authService: AuthService) {
+    constructor(aFirestore: Firestore, authService: AuthService) {
         this.history$ = new BehaviorSubject({});
 
         const documentRef$ = authService.user.pipe(map(user => {
@@ -45,7 +45,7 @@ export class PlayTrackerService {
         return this.history$;
     }
 
-    updateCurrentTime(identifier: string, value: number, duration?: number) {
+    updateCurrentTime(identifier: string, value: number, year: string, course: string, duration?: number) {
         if (!this.documentRef || !value) {
             return;
         }
@@ -57,14 +57,19 @@ export class PlayTrackerService {
                     // @ts-ignore
                     && (Date.now() - +history[key].updatedAt.toDate()) <= 20736000000) {
                     // Store for 240 days
-                    // Store for 240 days
-                    newHistory[key] = history[key];
+                    newHistory[key] = {
+                        currentTime: history[key].currentTime,
+                        updatedAt: history[key].updatedAt,
+                        duration: history[key].duration ?? 0
+                    };
                 }
             });
             newHistory[identifier] = {
                 currentTime: value,
                 updatedAt: serverTimestamp(),
                 duration: duration ?? 0,
+                year,
+                course
             };
             return newHistory;
         })).subscribe(history => setDoc(this.documentRef, {playHistory: history}));
@@ -73,7 +78,7 @@ export class PlayTrackerService {
 
 export const PlayTrackerServiceStub: Partial<PlayTrackerService> = {
     retrieve: () => new BehaviorSubject<PlayHistory>({}),
-    updateCurrentTime: (identifier: string, value: number, duration?: number) => {
+    updateCurrentTime: (identifier: string, value: number, year: string, course: string, duration?: number) => {
     }
 };
 
@@ -97,6 +102,8 @@ export interface PlayHistory {
 
 export interface PlayHistoryValue {
     duration: number | null;
-    currentTime: number | null;
-    updatedAt: Timestamp | FieldValue | null;
+    currentTime: number;
+    updatedAt: Timestamp | FieldValue;
+    year?: string;
+    course?: string;
 }
