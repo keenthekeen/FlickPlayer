@@ -10,6 +10,10 @@ ion-card-title {
   color: #222222;
 }
 
+.small-text {
+  color: #aaaaaa;
+}
+
 p {
   padding: 0 1.5rem 0 1.5rem;
   color: gray;
@@ -17,6 +21,10 @@ p {
 
   ion-icon {
     margin: 0 0.6em;
+    color: gray;
+  }
+
+  a {
     cursor: pointer;
   }
 }

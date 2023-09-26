@@ -26,9 +26,15 @@
     </ion-grid>
     <div *ngIf="lastVideo$ | async as lastVideo">
         <p *ngIf="lastVideo.course">
-            Last played: <span class="course-name">{{ lastVideo.course }}</span>
-            <ion-icon tabindex="0" name="play" (click)="goToLastVideo(lastVideo)"></ion-icon>
+            Last played:
+            <a (click)="goToLastVideo(lastVideo)">
+                <span class="course-name">{{ lastVideo.course }}</span>
+                <ion-icon name="play"></ion-icon>
+            </a>
         </p>
     </div>
-    <p>Content are provided for MDCU students only. You may not copy, reproduce, distribute, publish, display, create derivative works, transmit, or in any way exploit any such content.</p>
+    <p class="small-text">
+        Your feedback and suggestions are welcome. Please email them to <a href="mailto:siwat.techa@docchula.com" target="_blank" style="color: #bbbbbb">siwat.techa@docchula.com</a>.<br/>
+        Contents are provided for MDCU students only. You may not copy, reproduce, distribute, publish, display, create derivative works, transmit, or in any way exploit any such content.
+    </p>
 </ion-content>
