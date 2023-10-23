@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {filter, map, mergeMap, skipWhile, take} from 'rxjs/operators';
+import {map, mergeMap, skipWhile, take} from 'rxjs/operators';
 import {BehaviorSubject} from 'rxjs';
 import {
     collection,
@@ -35,9 +35,7 @@ export class PlayTrackerService {
             this.documentRef = documentRef;
         });
         documentRef$.pipe(skipWhile(v => v == null), mergeMap(documentRef => docData(documentRef))).subscribe(document => {
-            if (document) {
-                this.history$.next(document.playHistory ?? {});
-            }
+            this.history$.next(document ? (document.playHistory ?? {}) : {});
         });
     }
 
@@ -49,7 +47,7 @@ export class PlayTrackerService {
         if (!this.documentRef || !value) {
             return;
         }
-        this.history$.pipe(filter(v => Object.keys(v).length !== 0), take(1), map(history => {
+        this.history$.pipe(take(1), map(history => {
             const newHistory = {};
             Object.keys(history).forEach(key => {
                 if (history[key].currentTime
@@ -72,7 +70,9 @@ export class PlayTrackerService {
                 course
             };
             return newHistory;
-        })).subscribe(history => setDoc(this.documentRef, {playHistory: history}));
+        })).subscribe(history => {
+            setDoc(this.documentRef, {playHistory: history});
+        });
     }
 }
 
