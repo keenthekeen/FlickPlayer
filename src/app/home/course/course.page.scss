@@ -10,9 +10,11 @@ ion-title small {
   margin: 0 1rem;
 }
 
-ion-content {
-  .scroll-area {
-    height: calc(100vh - 70px);
-    overflow: auto;
+@media screen and (min-width: 992px) {
+  ion-content {
+    .scroll-area {
+      height: calc(100vh - 70px);
+      overflow: auto;
+    }
   }
 }
