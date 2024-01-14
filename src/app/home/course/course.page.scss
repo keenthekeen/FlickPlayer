@@ -9,3 +9,10 @@ ion-title small {
 .e-learning-tag {
   margin: 0 1rem;
 }
+
+ion-content {
+  .scroll-area {
+    height: calc(100vh - 70px);
+    overflow: auto;
+  }
+}
