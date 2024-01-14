@@ -61,7 +61,7 @@
                     </ion-list>
                 </ng-container>
             </ion-col>
-            <ion-col size="12" size-lg>
+            <ion-col size="12" class="scroll-area" size-lg>
                 <ion-list *ngIf="list$ | async as list">
                     <ion-item button *ngFor="let lecture of list | keyvalue trackBy: lectureById" (click)="viewVideo(lecture.value)"
                               [color]="(currentVideo && currentVideo.id && currentVideo.id === lecture.value.id) ? 'secondary' : ''">

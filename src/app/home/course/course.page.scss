@@ -9,3 +9,12 @@ ion-title small {
 .e-learning-tag {
   margin: 0 1rem;
 }
+
+@media screen and (min-width: 992px) {
+  ion-content {
+    .scroll-area {
+      height: calc(100vh - 70px);
+      overflow: auto;
+    }
+  }
+}
