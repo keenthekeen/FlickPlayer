@@ -10,6 +10,10 @@ ion-title small {
   margin: 0 1rem;
 }
 
+.align-center {
+  vertical-align: middle;
+}
+
 @media screen and (min-width: 992px) {
   ion-content {
     .scroll-area {
