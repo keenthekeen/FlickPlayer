@@ -4,7 +4,6 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {CourseMembers, Lecture, ManService} from '../../man.service';
 import {map, switchMap} from 'rxjs/operators';
 import videojs from 'video.js';
-import 'videojs-seek-buttons';
 import 'videojs-hotkeys';
 import 'videojs-event-tracking';
 import 'videojs-youtube';
@@ -12,7 +11,6 @@ import {AlertController} from '@ionic/angular';
 import {DomSanitizer} from '@angular/platform-browser';
 import {PlayHistory, PlayTrackerService} from '../../play-tracker.service';
 import {Analytics, logEvent} from '@angular/fire/analytics';
-import Player = videojs.Player;
 
 @Component({
     selector: 'app-course',
@@ -21,7 +19,7 @@ import Player = videojs.Player;
 })
 export class CoursePage implements OnInit, AfterViewInit {
     @ViewChild('videoPlayer') videoPlayerElement: ElementRef;
-    videoPlayer: Player;
+    videoPlayer: any;
     currentVideo: Lecture;
     year: string;
     course: string;
@@ -59,61 +57,40 @@ export class CoursePage implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit() {
-        const shouldOverrideNative =
-            // Override native HLS in Chrome Android, due to lack of support of playbackRate
-            (/Chrome/.test(navigator.userAgent) && /Android/.test(navigator.userAgent));
-        // also in desktop/iPad Safari, due to some HLS spec. incompatibility
-        // || (/Safari/.test(navigator.userAgent) && !/Mobile/.test(navigator.userAgent));
         this.videoPlayer = videojs(this.videoPlayerElement.nativeElement, {
-            ...(shouldOverrideNative ? {
-                html5: {
-                    hls: {
-                        overrideNative: true
-                    },
-                    nativeAudioTracks: false,
-                    nativeVideoTracks: false
-                }
-            } : {}),
             techOrder: ['html5', 'youtube'],
-            plugins: {
-                eventTracking: {
-                    performance: (data) => {
-                        if (this.videoPlayer.currentTime() > 30) {
-                            logEvent(this.analytics, 'video_performance', this.attachEventLabel(data, true));
-                            this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime, this.year, this.course);
-                        }
-                    }
-                },
-                hotkeys: {
-                    volumeStep: 0.1,
-                    seekStep: 10,
-                    enableModifiersForNumbers: false,
-                    enableVolumeScroll: false
-                },
-                seekButtons: {
-                    forward: 15,
-                    back: 10
+        }, () => {
+            this.videoPlayer.hotkeys({
+                volumeStep: 0.1,
+                seekStep: 5,
+                enableModifiersForNumbers: false,
+                enableVolumeScroll: false,
+            });
+            this.videoPlayer.on('tracking:firstplay', (_e, data) =>
+                logEvent(this.analytics, 'video_firstplay', this.attachEventLabel(data)));
+            this.videoPlayer.on('tracking:first-quarter', (_e, data) =>
+                this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime, this.year, this.course, data.duration));
+            this.videoPlayer.on('tracking:second-quarter', (_e, data) =>
+                this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime, this.year, this.course, data.duration));
+            this.videoPlayer.on('tracking:third-quarter', (_e, data) =>
+                this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime, this.year, this.course, data.duration));
+            this.videoPlayer.on('tracking:fourth-quarter', (_e, data) =>
+                this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime, this.year, this.course, data.duration));
+            this.videoPlayer.on('tracking:pause', () =>
+                this.playTracker.updateCurrentTime(this.currentVideo.identifier, this.videoPlayer.currentTime(), this.year, this.course, this.videoPlayer.duration()));
+            this.videoPlayer.on('tracking:performance', (_e, data) => {
+                console.log('performance');
+                if (this.videoPlayer.currentTime() > 30) {
+                    logEvent(this.analytics, 'video_performance', this.attachEventLabel(data, true));
+                    this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime, this.year, this.course);
                 }
-            }
-        });
-
-        this.videoPlayer.on('tracking:firstplay', (_e, data) =>
-            logEvent(this.analytics, 'video_firstplay', this.attachEventLabel(data)));
-        this.videoPlayer.on('tracking:first-quarter', (_e, data) =>
-            this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime, this.year, this.course, data.duration));
-        this.videoPlayer.on('tracking:second-quarter', (_e, data) =>
-            this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime, this.year, this.course, data.duration));
-        this.videoPlayer.on('tracking:third-quarter', (_e, data) =>
-            this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime, this.year, this.course, data.duration));
-        this.videoPlayer.on('tracking:fourth-quarter', (_e, data) =>
-            this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime, this.year, this.course, data.duration));
-        this.videoPlayer.on('tracking:pause', () =>
-            this.playTracker.updateCurrentTime(this.currentVideo.identifier, this.videoPlayer.currentTime(), this.year, this.course, this.videoPlayer.duration()));
-        this.videoPlayer.on('loadedmetadata', () => {
-            if (this.currentVideo.history.currentTime
-                && (!this.currentVideo.duration || (((this.currentVideo.history.currentTime ?? 0) / this.currentVideo.duration) < 0.995))) {
-                this.videoPlayer.currentTime(this.currentVideo.history.currentTime);
-            }
+            });
+            this.videoPlayer.on('loadedmetadata', () => {
+                if (this.currentVideo.history.currentTime
+                    && (!this.currentVideo.duration || (((this.currentVideo.history.currentTime ?? 0) / this.currentVideo.duration) < 0.995))) {
+                    this.videoPlayer.currentTime(this.currentVideo.history.currentTime);
+                }
+            });
         });
     }
 

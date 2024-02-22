@@ -19,7 +19,7 @@
         <ion-row>
             <ion-col size="12" size-lg [hidden]="!currentVideo">
                 <video #videoPlayer class="video-js vjs-default-skin fullwidth" controls preload="metadata"
-                       data-setup='{"aspectRatio":"1280:640", "playbackRates": [0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 3], "plugins": {"seekButtons": {"forward": 10, "back": 10}}}'
+                       data-setup='{"aspectRatio":"1280:640", "playbackRates": [0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 3]}'
                        [hidden]="currentVideo && currentVideo.sources.length === 0"
                        (contextmenu)="preventMouseEvent($event)" tabindex="1">
                     Your browser does not support the video tag.
