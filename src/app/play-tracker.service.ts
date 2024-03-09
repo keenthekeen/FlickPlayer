@@ -50,7 +50,7 @@ export class PlayTrackerService {
         this.history$.pipe(take(1), map(history => {
             const newHistory = {};
             Object.keys(history).forEach(key => {
-                if (history[key].currentTime
+                if (history[key].currentTime && history[key].updatedAt
                     && history[key].currentTime > 3
                     // @ts-ignore
                     && (Date.now() - +history[key].updatedAt.toDate()) <= 20736000000) {

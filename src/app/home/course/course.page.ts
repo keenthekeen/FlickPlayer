@@ -24,7 +24,7 @@ export class CoursePage implements OnInit, AfterViewInit {
     currentVideo: Lecture;
     year: string;
     course: string;
-    list$: Observable<CourseMembers>;
+    list$: Observable<Lecture[]>;
     courseProgress = {
         viewed: 0,
         duration: 0
@@ -119,7 +119,7 @@ export class CoursePage implements OnInit, AfterViewInit {
             }
         });
         this.courseProgress = progress;
-        return videos;
+        return Object.values(videos);
     }
 
     viewVideo(video: Lecture) {
@@ -190,8 +190,8 @@ export class CoursePage implements OnInit, AfterViewInit {
         return encodeURIComponent(url);
     }
 
-    lectureById(index: number, lecture: { key: string, value: Lecture }) {
-        return lecture.value.identifier;
+    lectureById(index: number, lecture: Lecture) {
+        return lecture.identifier;
     }
 
     protected attachEventLabel(data, isNonInteraction?: boolean) {

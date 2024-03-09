@@ -63,35 +63,35 @@
             </ion-col>
             <ion-col size="12" size-lg [ngClass]="currentVideo ? 'scroll-area' : ''">
                 <ion-list *ngIf="list$ | async as list">
-                    <ion-item button *ngFor="let lecture of list | keyvalue trackBy: lectureById" (click)="viewVideo(lecture.value)"
-                              [color]="(currentVideo && currentVideo.id && currentVideo.id === lecture.value.id) ? 'secondary' : ''">
+                    <ion-item button *ngFor="let lecture of list trackBy: lectureById" (click)="viewVideo(lecture)"
+                              [color]="(currentVideo && currentVideo.id && currentVideo.id === lecture.id) ? 'secondary' : ''">
                         <ion-label class="ion-text-wrap">
-                            <span *ngIf="lecture.value.date">{{ lecture.value.date | date:"d MMM y" }} - </span>
-                            {{ lecture.value.title }}
+                            <span *ngIf="lecture.date">{{ lecture.date | date:"d MMM y" }} | </span>
+                            {{ lecture.title }}
                             <small>
-                                {{ lecture.value.lecturer}}
-                                <span *ngIf="lecture.value.durationInMin">- {{ lecture.value.durationInMin}} min </span>
-                                <span *ngIf="lecture.value.history.currentTime && lecture.value.history.currentTime > 3">
-                                    <span *ngIf="!lecture.value.duration">
-                                        - {{ (lecture.value.history.currentTime) / 60 | number:'1.0-0'}} min played
+                                {{ lecture.lecturer}}
+                                <span *ngIf="lecture.durationInMin">- {{ lecture.durationInMin}} min </span>
+                                <span *ngIf="lecture.history.currentTime && lecture.history.currentTime > 3">
+                                    <span *ngIf="!lecture.duration">
+                                        - {{ (lecture.history.currentTime) / 60 | number:'1.0-0'}} min played
                                     </span>
-                                    <span *ngIf="lecture.value.duration && lecture.value.history.currentTime/lecture.value.duration < 0.995">
-                                        - {{ (lecture.value.duration - lecture.value.history.currentTime) / 60 | number:'1.0-0'}} min left
+                                    <span *ngIf="lecture.duration && lecture.history.currentTime/lecture.duration < 0.995">
+                                        - {{ (lecture.duration - lecture.history.currentTime) / 60 | number:'1.0-0'}} min left
                                     </span>
                                 </span>
-                                <ion-icon *ngIf="lecture.value.attachments.length !== 0" name="document-attach-outline" size="small" color="medium"></ion-icon>
+                                <ion-icon *ngIf="lecture.attachments.length !== 0" name="document-attach-outline" size="small" color="medium"></ion-icon>
                             </small>
                             <ion-progress-bar
-                                    *ngIf="lecture.value.history.currentTime && lecture.value.duration && lecture.value.history.currentTime > 3 && (lecture.value.history.currentTime/lecture.value.duration < 0.995)"
-                                    [value]="lecture.value.history.currentTime/lecture.value.duration"></ion-progress-bar>
+                                    *ngIf="lecture.history.currentTime && lecture.duration && lecture.history.currentTime > 3 && (lecture.history.currentTime/lecture.duration < 0.995)"
+                                    [value]="lecture.history.currentTime/lecture.duration"></ion-progress-bar>
                         </ion-label>
                         <ion-icon
-                                *ngIf="lecture.value.history.currentTime && lecture.value.duration && (lecture.value.history.currentTime/lecture.value.duration >= 0.995)"
+                                *ngIf="lecture.history.currentTime && lecture.duration && (lecture.history.currentTime/lecture.duration >= 0.995)"
                                 name="checkmark-outline"
                                 slot="end"
                                 color="success"></ion-icon>
                         <ion-icon
-                                *ngIf="lecture.value.sources.length === 0"
+                                *ngIf="lecture.sources.length === 0"
                                 name="close-outline"
                                 slot="end"
                                 color="danger"></ion-icon>
