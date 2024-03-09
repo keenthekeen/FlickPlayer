@@ -10,6 +10,24 @@ ion-title small {
   margin: 0 1rem;
 }
 
+span.date {
+  color: darkblue;
+  @media (prefers-color-scheme: dark) {
+    color: lightblue;
+  }
+}
+
+.time-info {
+  color: darkgoldenrod;
+  @media (prefers-color-scheme: dark) {
+    color: yellow;
+  }
+}
+
+.ion-color .check-icon {
+  background-color: white;
+}
+
 @media screen and (min-width: 992px) {
   ion-content {
     .scroll-area {

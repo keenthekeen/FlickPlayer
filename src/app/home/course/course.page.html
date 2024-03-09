@@ -66,12 +66,12 @@
                     <ion-item button *ngFor="let lecture of list trackBy: lectureById" (click)="viewVideo(lecture)"
                               [color]="(currentVideo && currentVideo.id && currentVideo.id === lecture.id) ? 'secondary' : ''">
                         <ion-label class="ion-text-wrap">
-                            <span *ngIf="lecture.date">{{ lecture.date | date:"d MMM y" }} | </span>
+                            <span *ngIf="lecture.date" class="date">{{ lecture.date | date:"d MMM y" }} | </span>
                             {{ lecture.title }}
                             <small>
                                 {{ lecture.lecturer}}
-                                <span *ngIf="lecture.durationInMin">- {{ lecture.durationInMin}} min </span>
-                                <span *ngIf="lecture.history.currentTime && lecture.history.currentTime > 3">
+                                <span class="time-info" *ngIf="lecture.durationInMin">- {{ lecture.durationInMin}} min </span>
+                                <span class="time-info" *ngIf="lecture.history.currentTime && lecture.history.currentTime > 3">
                                     <span *ngIf="!lecture.duration">
                                         - {{ (lecture.history.currentTime) / 60 | number:'1.0-0'}} min played
                                     </span>
@@ -86,6 +86,7 @@
                                     [value]="lecture.history.currentTime/lecture.duration"></ion-progress-bar>
                         </ion-label>
                         <ion-icon
+                                class="check-icon"
                                 *ngIf="lecture.history.currentTime && lecture.duration && (lecture.history.currentTime/lecture.duration >= 0.995)"
                                 name="checkmark-outline"
                                 slot="end"

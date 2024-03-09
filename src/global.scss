@@ -41,3 +41,11 @@
   color: #aaaaaa;
   display: inline-block;
 }
+
+@media (prefers-color-scheme: dark) {
+  .e-learning-tag {
+    border: #cccccc solid 1px;
+    background-color: #444444;
+    color: #cccccc;
+  }
+}
