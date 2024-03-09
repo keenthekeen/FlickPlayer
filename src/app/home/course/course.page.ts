@@ -60,6 +60,12 @@ export class CoursePage implements OnInit, AfterViewInit {
 
     ngAfterViewInit() {
         this.videoPlayer = videojs(this.videoPlayerElement.nativeElement, {
+            controlBar: {
+                skipButtons: {
+                    forward: 10,
+                    backward: 5,
+                }
+            },
             techOrder: ['html5', 'youtube'],
         }, () => {
             this.videoPlayer.hotkeys({
