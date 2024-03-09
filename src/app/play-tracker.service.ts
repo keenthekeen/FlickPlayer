@@ -44,7 +44,6 @@ export class PlayTrackerService {
     }
 
     updateCurrentTime(identifier: string, value: number, year: string, course: string, duration?: number) {
-        console.log("Update current time: ", value);
         if (!this.documentRef || !value) {
             return;
         }

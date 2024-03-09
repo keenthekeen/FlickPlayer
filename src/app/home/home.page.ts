@@ -1,11 +1,13 @@
-import {Component, OnInit} from '@angular/core';
-import {last, Observable} from 'rxjs';
-import {ManService} from '../man.service';
-import {map} from 'rxjs/operators';
-import {Router} from '@angular/router';
-import {AuthService} from '../auth.service';
-import {colorByFolderName} from '../../helpers';
-import {PlayHistoryValue, PlayTrackerService} from '../play-tracker.service';
+import { Component, OnInit } from '@angular/core';
+import { last, Observable } from 'rxjs';
+import { ManService } from '../man.service';
+import { map } from 'rxjs/operators';
+import { Router } from '@angular/router';
+import { AuthService } from '../auth.service';
+import { colorByFolderName } from '../../helpers';
+import { PlayHistoryValue, PlayTrackerService } from '../play-tracker.service';
+import { addIcons } from "ionicons";
+import { logOutOutline, play } from "ionicons/icons";
 
 @Component({
     selector: 'app-home',
@@ -18,7 +20,8 @@ export class HomePage implements OnInit {
     protected readonly last = last;
 
     constructor(private manService: ManService, private router: Router, private authService: AuthService,
-                private playTracker: PlayTrackerService) {
+        private playTracker: PlayTrackerService) {
+        addIcons({ logOutOutline, play });
 
     }
 

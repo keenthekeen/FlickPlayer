@@ -65,7 +65,9 @@ export class ManService {
                     sources: thisLecture.sources ? thisLecture.sources.map(source => {
                         source.src = source.src
                             ?? ((source.server ?? server) + identifierFragment + source.path);
-                        source.src += (source.src.includes('?') ? '&key=' : '?key=') + encodeURIComponent(response.data.key);
+                        if (source.src.includes('docchula.com')) {
+                            source.src += (source.src.includes('?') ? '&key=' : '?key=') + encodeURIComponent(response.data.key);
+                        }
                         return source;
                     }) : [],
                     attachments: thisLecture.attachments ? thisLecture.attachments.map(source => {

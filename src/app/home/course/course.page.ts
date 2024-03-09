@@ -1,16 +1,17 @@
-import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
-import {combineLatest, EMPTY, Observable} from 'rxjs';
-import {ActivatedRoute, Router} from '@angular/router';
-import {CourseMembers, Lecture, ManService} from '../../man.service';
-import {map, switchMap} from 'rxjs/operators';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { combineLatest, EMPTY, Observable } from 'rxjs';
+import { ActivatedRoute, Router } from '@angular/router';
+import { CourseMembers, Lecture, ManService } from '../../man.service';
+import { map, switchMap } from 'rxjs/operators';
 import videojs from 'video.js';
 import 'videojs-hotkeys';
-import 'videojs-event-tracking';
 import 'videojs-youtube';
-import {AlertController} from '@ionic/angular';
-import {DomSanitizer} from '@angular/platform-browser';
-import {PlayHistory, PlayTrackerService} from '../../play-tracker.service';
-import {Analytics, logEvent} from '@angular/fire/analytics';
+import { AlertController } from '@ionic/angular/standalone';
+import { DomSanitizer } from '@angular/platform-browser';
+import { PlayHistory, PlayTrackerService } from '../../play-tracker.service';
+import { Analytics, logEvent } from '@angular/fire/analytics';
+import { addIcons } from "ionicons";
+import { download, documentAttachOutline, checkmarkOutline, closeOutline } from "ionicons/icons";
 
 @Component({
     selector: 'app-course',
@@ -32,9 +33,10 @@ export class CoursePage implements OnInit, AfterViewInit {
     isIos = /iPad/i.test(navigator.userAgent) || /iPhone/i.test(navigator.userAgent);
 
     constructor(private route: ActivatedRoute, private router: Router,
-                private manService: ManService, private alertController: AlertController,
-                private analytics: Analytics, private sanitizer: DomSanitizer,
-                private playTracker: PlayTrackerService) {
+        private manService: ManService, private alertController: AlertController,
+        private analytics: Analytics, private sanitizer: DomSanitizer,
+        private playTracker: PlayTrackerService) {
+        addIcons({ download, documentAttachOutline, checkmarkOutline, closeOutline });
     }
 
     ngOnInit() {
@@ -66,18 +68,22 @@ export class CoursePage implements OnInit, AfterViewInit {
                 enableModifiersForNumbers: false,
                 enableVolumeScroll: false,
             });
-            this.videoPlayer.on('tracking:firstplay', (_e, data) =>
-                logEvent(this.analytics, 'video_firstplay', this.attachEventLabel(data)));
-            this.videoPlayer.on('tracking:first-quarter', (_e, data) =>
-                this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime, this.year, this.course, data.duration));
-            this.videoPlayer.on('tracking:second-quarter', (_e, data) =>
-                this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime, this.year, this.course, data.duration));
-            this.videoPlayer.on('tracking:third-quarter', (_e, data) =>
-                this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime, this.year, this.course, data.duration));
-            this.videoPlayer.on('tracking:fourth-quarter', (_e, data) =>
-                this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime, this.year, this.course, data.duration));
-            this.videoPlayer.on('tracking:pause', () =>
+            this.videoPlayer.on('pause', () => {
+                if (!this.videoPlayer.seeking()) {
+                    // is paused, not seeking
+                    this.playTracker.updateCurrentTime(this.currentVideo.identifier, this.videoPlayer.currentTime(), this.year, this.course, this.videoPlayer.duration());
+                }
+            });
+            this.videoPlayer.on('ended', () =>
                 this.playTracker.updateCurrentTime(this.currentVideo.identifier, this.videoPlayer.currentTime(), this.year, this.course, this.videoPlayer.duration()));
+            let lastUpdated = 0;
+            this.videoPlayer.on('timeupdate', () => {
+                // Update while playing every 10 minutes
+                if (Date.now() - lastUpdated > 600000) {
+                    lastUpdated = Date.now();
+                    this.playTracker.updateCurrentTime(this.currentVideo.identifier, this.videoPlayer.currentTime(), this.year, this.course, this.videoPlayer.duration());
+                }
+            });
             this.videoPlayer.on('tracking:performance', (_e, data) => {
                 console.log('performance');
                 if (this.videoPlayer.currentTime() > 30) {
@@ -100,7 +106,7 @@ export class CoursePage implements OnInit, AfterViewInit {
             duration: 0
         };
         Object.keys(videos).forEach(lectureKey => {
-            videos[lectureKey].history = history[videos[lectureKey].identifier] ?? {currentTime: null, updatedAt: null, duration: null};
+            videos[lectureKey].history = history[videos[lectureKey].identifier] ?? { currentTime: null, updatedAt: null, duration: null };
             if (!videos[lectureKey].duration && videos[lectureKey].history.duration) {
                 videos[lectureKey].duration = videos[lectureKey].history.duration;
                 videos[lectureKey].durationInMin = videos[lectureKey].duration ? Math.round(videos[lectureKey].duration / 60) : 0
@@ -188,7 +194,7 @@ export class CoursePage implements OnInit, AfterViewInit {
         return lecture.value.identifier;
     }
 
-    protected attachEventLabel(data, isNonInteraction ?: boolean) {
+    protected attachEventLabel(data, isNonInteraction?: boolean) {
         return {
             ...data,
             event_label: this.currentVideo.identifier,
