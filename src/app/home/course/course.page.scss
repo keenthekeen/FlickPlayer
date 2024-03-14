@@ -10,7 +10,25 @@ ion-title small {
   margin: 0 1rem;
 }
 
-.align-center {
+span.date {
+  color: darkblue;
+  @media (prefers-color-scheme: dark) {
+    color: lightblue;
+  }
+}
+
+.time-info {
+  color: darkgoldenrod;
+  @media (prefers-color-scheme: dark) {
+    color: yellow;
+  }
+}
+
+.ion-color .check-icon {
+  background-color: white;
+}
+
+.set-playback-speed-button {
   vertical-align: middle;
 }
 
