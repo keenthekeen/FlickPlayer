@@ -1,9 +1,10 @@
-import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {EMPTY, Observable} from 'rxjs';
-import {map, switchMap} from 'rxjs/operators';
-import {ManService} from '../../man.service';
-import {colorByFolderName} from '../../../helpers';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { EMPTY, Observable } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
+import { ManService } from '../../man.service';
+import { colorByFolderName } from '../../../helpers';
+import { IonRouterLink } from "@ionic/angular/standalone";
 
 @Component({
     selector: 'app-list',

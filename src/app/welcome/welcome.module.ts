@@ -2,25 +2,29 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Routes, RouterModule } from '@angular/router';
-
-import { IonicModule } from '@ionic/angular';
-
 import { WelcomePage } from './welcome.page';
+import { IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonText } from "@ionic/angular/standalone";
 
 const routes: Routes = [
-  {
-    path: '',
-    component: WelcomePage
-  }
+    {
+        path: '',
+        component: WelcomePage
+    }
 ];
 
 @NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    IonicModule,
-    RouterModule.forChild(routes)
-  ],
-  declarations: [WelcomePage]
+    imports: [
+        CommonModule,
+        FormsModule,
+        RouterModule.forChild(routes),
+        IonContent,
+        IonCard,
+        IonCardHeader,
+        IonCardTitle,
+        IonCardContent,
+        IonButton,
+        IonText
+    ],
+    declarations: [WelcomePage]
 })
-export class WelcomePageModule {}
+export class WelcomePageModule { }

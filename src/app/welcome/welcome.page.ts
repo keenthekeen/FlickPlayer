@@ -1,11 +1,11 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {AlertController, LoadingController} from '@ionic/angular';
-import {Router} from '@angular/router';
-import {ManService} from '../man.service';
-import {HttpErrorResponse} from '@angular/common/http';
-import {Subscription} from 'rxjs';
-import {User} from '@angular/fire/auth';
-import {AuthService} from '../auth.service';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { AlertController, LoadingController } from '@ionic/angular/standalone';
+import { Router } from '@angular/router';
+import { ManService } from '../man.service';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Subscription } from 'rxjs';
+import { User } from '@angular/fire/auth';
+import { AuthService } from '../auth.service';
 
 @Component({
     selector: 'app-welcome',

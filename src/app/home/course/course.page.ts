@@ -1,18 +1,17 @@
-import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
-import {combineLatest, EMPTY, Observable} from 'rxjs';
-import {ActivatedRoute, Router} from '@angular/router';
-import {CourseMembers, Lecture, ManService} from '../../man.service';
-import {map, switchMap} from 'rxjs/operators';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { combineLatest, EMPTY, Observable } from 'rxjs';
+import { ActivatedRoute, Router } from '@angular/router';
+import { CourseMembers, Lecture, ManService } from '../../man.service';
+import { map, switchMap } from 'rxjs/operators';
 import videojs from 'video.js';
-import 'videojs-seek-buttons';
 import 'videojs-hotkeys';
-import 'videojs-event-tracking';
 import 'videojs-youtube';
-import {AlertController} from '@ionic/angular';
-import {DomSanitizer} from '@angular/platform-browser';
-import {PlayHistory, PlayTrackerService} from '../../play-tracker.service';
-import {Analytics, logEvent} from '@angular/fire/analytics';
-import Player = videojs.Player;
+import { AlertController } from '@ionic/angular/standalone';
+import { DomSanitizer } from '@angular/platform-browser';
+import { PlayHistory, PlayTrackerService } from '../../play-tracker.service';
+import { Analytics, logEvent } from '@angular/fire/analytics';
+import { addIcons } from "ionicons";
+import { download, documentAttachOutline, checkmarkOutline, closeOutline } from "ionicons/icons";
 
 @Component({
     selector: 'app-course',
@@ -21,11 +20,11 @@ import Player = videojs.Player;
 })
 export class CoursePage implements OnInit, AfterViewInit {
     @ViewChild('videoPlayer') videoPlayerElement: ElementRef;
-    videoPlayer: Player;
+    videoPlayer: any;
     currentVideo: Lecture;
     year: string;
     course: string;
-    list$: Observable<CourseMembers>;
+    list$: Observable<Lecture[]>;
     courseProgress = {
         viewed: 0,
         duration: 0
@@ -34,9 +33,10 @@ export class CoursePage implements OnInit, AfterViewInit {
     isIos = /iPad/i.test(navigator.userAgent) || /iPhone/i.test(navigator.userAgent);
 
     constructor(private route: ActivatedRoute, private router: Router,
-                private manService: ManService, private alertController: AlertController,
-                private analytics: Analytics, private sanitizer: DomSanitizer,
-                private playTracker: PlayTrackerService) {
+        private manService: ManService, private alertController: AlertController,
+        private analytics: Analytics, private sanitizer: DomSanitizer,
+        private playTracker: PlayTrackerService) {
+        addIcons({ download, documentAttachOutline, checkmarkOutline, closeOutline });
     }
 
     ngOnInit() {
@@ -59,61 +59,50 @@ export class CoursePage implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit() {
-        const shouldOverrideNative =
-            // Override native HLS in Chrome Android, due to lack of support of playbackRate
-            (/Chrome/.test(navigator.userAgent) && /Android/.test(navigator.userAgent));
-        // also in desktop/iPad Safari, due to some HLS spec. incompatibility
-        // || (/Safari/.test(navigator.userAgent) && !/Mobile/.test(navigator.userAgent));
         this.videoPlayer = videojs(this.videoPlayerElement.nativeElement, {
-            ...(shouldOverrideNative ? {
-                html5: {
-                    hls: {
-                        overrideNative: true
-                    },
-                    nativeAudioTracks: false,
-                    nativeVideoTracks: false
+            controlBar: {
+                skipButtons: {
+                    forward: 10,
+                    backward: 5,
                 }
-            } : {}),
+            },
             techOrder: ['html5', 'youtube'],
-            plugins: {
-                eventTracking: {
-                    performance: (data) => {
-                        if (this.videoPlayer.currentTime() > 30) {
-                            logEvent(this.analytics, 'video_performance', this.attachEventLabel(data, true));
-                            this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime, this.year, this.course);
-                        }
-                    }
-                },
-                hotkeys: {
-                    volumeStep: 0.1,
-                    seekStep: 10,
-                    enableModifiersForNumbers: false,
-                    enableVolumeScroll: false
-                },
-                seekButtons: {
-                    forward: 15,
-                    back: 10
+        }, () => {
+            this.videoPlayer.hotkeys({
+                volumeStep: 0.1,
+                seekStep: 5,
+                enableModifiersForNumbers: false,
+                enableVolumeScroll: false,
+            });
+            this.videoPlayer.on('pause', () => {
+                if (!this.videoPlayer.seeking()) {
+                    // is paused, not seeking
+                    this.playTracker.updateCurrentTime(this.currentVideo.identifier, this.videoPlayer.currentTime(), this.year, this.course, this.videoPlayer.duration());
                 }
-            }
-        });
-
-        this.videoPlayer.on('tracking:firstplay', (_e, data) =>
-            logEvent(this.analytics, 'video_firstplay', this.attachEventLabel(data)));
-        this.videoPlayer.on('tracking:first-quarter', (_e, data) =>
-            this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime, this.year, this.course, data.duration));
-        this.videoPlayer.on('tracking:second-quarter', (_e, data) =>
-            this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime, this.year, this.course, data.duration));
-        this.videoPlayer.on('tracking:third-quarter', (_e, data) =>
-            this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime, this.year, this.course, data.duration));
-        this.videoPlayer.on('tracking:fourth-quarter', (_e, data) =>
-            this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime, this.year, this.course, data.duration));
-        this.videoPlayer.on('tracking:pause', () =>
-            this.playTracker.updateCurrentTime(this.currentVideo.identifier, this.videoPlayer.currentTime(), this.year, this.course, this.videoPlayer.duration()));
-        this.videoPlayer.on('loadedmetadata', () => {
-            if (this.currentVideo.history.currentTime
-                && (!this.currentVideo.duration || (((this.currentVideo.history.currentTime ?? 0) / this.currentVideo.duration) < 0.995))) {
-                this.videoPlayer.currentTime(this.currentVideo.history.currentTime);
-            }
+            });
+            this.videoPlayer.on('ended', () =>
+                this.playTracker.updateCurrentTime(this.currentVideo.identifier, this.videoPlayer.currentTime(), this.year, this.course, this.videoPlayer.duration()));
+            let lastUpdated = 0;
+            this.videoPlayer.on('timeupdate', () => {
+                // Update while playing every 10 minutes
+                if (Date.now() - lastUpdated > 600000) {
+                    lastUpdated = Date.now();
+                    this.playTracker.updateCurrentTime(this.currentVideo.identifier, this.videoPlayer.currentTime(), this.year, this.course, this.videoPlayer.duration());
+                }
+            });
+            this.videoPlayer.on('tracking:performance', (_e, data) => {
+                console.log('performance');
+                if (this.videoPlayer.currentTime() > 30) {
+                    logEvent(this.analytics, 'video_performance', this.attachEventLabel(data, true));
+                    this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime, this.year, this.course);
+                }
+            });
+            this.videoPlayer.on('loadedmetadata', () => {
+                if (this.currentVideo.history.currentTime
+                    && (!this.currentVideo.duration || (((this.currentVideo.history.currentTime ?? 0) / this.currentVideo.duration) < 0.995))) {
+                    this.videoPlayer.currentTime(this.currentVideo.history.currentTime);
+                }
+            });
         });
     }
 
@@ -123,7 +112,7 @@ export class CoursePage implements OnInit, AfterViewInit {
             duration: 0
         };
         Object.keys(videos).forEach(lectureKey => {
-            videos[lectureKey].history = history[videos[lectureKey].identifier] ?? {currentTime: null, updatedAt: null, duration: null};
+            videos[lectureKey].history = history[videos[lectureKey].identifier] ?? { currentTime: null, updatedAt: null, duration: null };
             if (!videos[lectureKey].duration && videos[lectureKey].history.duration) {
                 videos[lectureKey].duration = videos[lectureKey].history.duration;
                 videos[lectureKey].durationInMin = videos[lectureKey].duration ? Math.round(videos[lectureKey].duration / 60) : 0
@@ -136,7 +125,7 @@ export class CoursePage implements OnInit, AfterViewInit {
             }
         });
         this.courseProgress = progress;
-        return videos;
+        return Object.values(videos);
     }
 
     viewVideo(video: Lecture) {
@@ -207,11 +196,11 @@ export class CoursePage implements OnInit, AfterViewInit {
         return encodeURIComponent(url);
     }
 
-    lectureById(index: number, lecture: { key: string, value: Lecture }) {
-        return lecture.value.identifier;
+    lectureById(index: number, lecture: Lecture) {
+        return lecture.identifier;
     }
 
-    protected attachEventLabel(data, isNonInteraction ?: boolean) {
+    protected attachEventLabel(data, isNonInteraction?: boolean) {
         return {
             ...data,
             event_label: this.currentVideo.identifier,

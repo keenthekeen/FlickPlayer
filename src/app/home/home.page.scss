@@ -18,6 +18,16 @@ ion-card-title {
 
 .small-text {
   color: #aaaaaa;
+  a {
+    color: #bbbbbb;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    color: #555555;
+    a {
+      color: #666666;
+    }
+  }
 }
 
 p {
