@@ -31,7 +31,7 @@
                             <span class="ion-hide-md-down">
                                 <strong>Hotkeys</strong>&emsp; Space: Pause, ▲/▼: Volume, ◄/►: Seek, F: Fullscreen |
                             </span>
-                            <a (click)="setPlaybackSpeed()" (keyup)="setPlaybackSpeed()" tabindex="0">Set playback speed</a>
+                            <ion-button (click)="setPlaybackSpeed()" (keyup)="setPlaybackSpeed()" fill="outline" size="small" tabindex="0" class="set-playback-speed-button">Set playback speed</ion-button>
                             <span *ngIf="isAndroid && currentVideo.sourceExternal">
                                 | <a [href]="sanitize('intent:'+currentVideo.sourceExternal+'#Intent;S.title='+encodeURIComponent(currentVideo.title)+';package=com.mxtech.videoplayer.ad;end')" rel="noreferrer">Play with MX Player</a>
                             </span>
