@@ -1,5 +1,6 @@
 ion-card {
   min-height: 4rem;
+  cursor: pointer;
 }
 
 ion-card-title {
@@ -43,8 +44,4 @@ p {
   a {
     cursor: pointer;
   }
-}
-
-.folder-list {
-  cursor: pointer;
 }
