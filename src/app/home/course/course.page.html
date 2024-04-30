@@ -66,7 +66,8 @@
                     <ion-item button *ngFor="let lecture of list trackBy: lectureById" (click)="viewVideo(lecture)"
                               [color]="(currentVideo && currentVideo.id && currentVideo.id === lecture.id) ? 'secondary' : ''">
                         <ion-label class="ion-text-wrap">
-                            <span *ngIf="lecture.date" class="date">{{ lecture.date | date:"d MMM y" }} | </span>
+                            <span *ngIf="lecture.date" class="date">{{ lecture.date | date:"dd MMM y" }}</span>
+                            <span *ngIf="lecture.date" class="date-divider"> | </span>
                             {{ lecture.title }}
                             <small>
                                 {{ lecture.lecturer}}

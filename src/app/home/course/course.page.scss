@@ -11,6 +11,16 @@ ion-title small {
 }
 
 span.date {
+  font-family: monospace, monospace;
+  color: darkblue;
+  @media (prefers-color-scheme: dark) {
+    color: lightblue;
+  }
+}
+
+span.date-divider {
+  margin: 0 0.2rem 0 0.2rem;
+  opacity: 0.5;
   color: darkblue;
   @media (prefers-color-scheme: dark) {
     color: lightblue;
