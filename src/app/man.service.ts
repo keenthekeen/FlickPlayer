@@ -74,7 +74,7 @@ export class ManService {
                         source.src = source.src
                             ?? ((source.server ?? server) + identifierFragment + source.path);
                         source.src += (source.src.includes('?') ? '&key=' : '?key=') + encodeURIComponent(response.data.key);
-                        source.name = source.name ?? source.path.substring(3);
+                        source.name = source.name ?? (source.path.startsWith('DL ') ? source.path.substring(3) : source.path);
                         return source;
                     }) : [],
                     identifier: thisLecture.identifier
