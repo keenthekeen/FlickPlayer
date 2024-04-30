@@ -63,14 +63,14 @@ export class CoursePage implements OnInit, AfterViewInit {
             controlBar: {
                 skipButtons: {
                     forward: 10,
-                    backward: 5,
+                    backward: 10,
                 }
             },
             techOrder: ['html5', 'youtube'],
         }, () => {
             this.videoPlayer.hotkeys({
                 volumeStep: 0.1,
-                seekStep: 5,
+                seekStep: 10,
                 enableModifiersForNumbers: false,
                 enableVolumeScroll: false,
             });
