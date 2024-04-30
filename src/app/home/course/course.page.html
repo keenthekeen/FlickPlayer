@@ -64,7 +64,7 @@
             <ion-col size="12" size-lg [ngClass]="currentVideo ? 'scroll-area' : ''">
                 <ion-list *ngIf="list$ | async as list">
                     <ion-item button *ngFor="let lecture of list trackBy: lectureById" (click)="viewVideo(lecture)"
-                              [color]="(currentVideo && currentVideo.id && currentVideo.id === lecture.id) ? 'secondary' : ''">
+                              [color]="(currentVideo && currentVideo.id && currentVideo.id === lecture.id) ? 'secondary' : ((lastPlayedVideoKey === lecture.identifier && !currentVideo) ? 'tertiary' : '')">
                         <ion-label class="ion-text-wrap">
                             <span *ngIf="lecture.date" class="date">{{ lecture.date | date:"dd MMM y" }}</span>
                             <span *ngIf="lecture.date" class="date-divider"> | </span>
@@ -97,6 +97,11 @@
                                 name="close-outline"
                                 slot="end"
                                 color="danger"></ion-icon>
+                        <ion-icon
+                                *ngIf="lastPlayedVideoKey === lecture.identifier"
+                                name="pause-circle-outline"
+                                slot="end"
+                                color="medium"></ion-icon>
                     </ion-item>
                 </ion-list>
             </ion-col>

@@ -1,26 +1,27 @@
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { combineLatest, EMPTY, Observable } from 'rxjs';
-import { ActivatedRoute, Router } from '@angular/router';
-import { CourseMembers, Lecture, ManService } from '../../man.service';
-import { map, switchMap } from 'rxjs/operators';
+import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {combineLatest, EMPTY, Observable} from 'rxjs';
+import {ActivatedRoute, Router} from '@angular/router';
+import {CourseMembers, Lecture, ManService} from '../../man.service';
+import {map, switchMap} from 'rxjs/operators';
 import videojs from 'video.js';
 import 'videojs-hotkeys';
 import 'videojs-youtube';
-import { AlertController } from '@ionic/angular/standalone';
-import { DomSanitizer } from '@angular/platform-browser';
-import { PlayHistory, PlayTrackerService } from '../../play-tracker.service';
-import { Analytics, logEvent } from '@angular/fire/analytics';
-import { addIcons } from "ionicons";
-import { download, documentAttachOutline, checkmarkOutline, closeOutline } from "ionicons/icons";
+import {AlertController} from '@ionic/angular/standalone';
+import {DomSanitizer} from '@angular/platform-browser';
+import {PlayHistory, PlayTrackerService} from '../../play-tracker.service';
+import {Analytics, logEvent} from '@angular/fire/analytics';
+import {addIcons} from "ionicons";
+import {checkmarkOutline, closeOutline, documentAttachOutline, download, pauseCircleOutline} from "ionicons/icons";
+import Player from 'video.js/dist/types/player';
 
 @Component({
     selector: 'app-course',
     templateUrl: './course.page.html',
-    styleUrls: ['./course.page.scss']
+    styleUrls: ['./course.page.scss'],
 })
 export class CoursePage implements OnInit, AfterViewInit {
     @ViewChild('videoPlayer') videoPlayerElement: ElementRef;
-    videoPlayer: any;
+    videoPlayer: Player;
     currentVideo: Lecture;
     year: string;
     course: string;
@@ -31,12 +32,13 @@ export class CoursePage implements OnInit, AfterViewInit {
     };
     isAndroid = /Android/i.test(navigator.userAgent);
     isIos = /iPad/i.test(navigator.userAgent) || /iPhone/i.test(navigator.userAgent);
+    lastPlayedVideoKey: string|null = null;
 
     constructor(private route: ActivatedRoute, private router: Router,
         private manService: ManService, private alertController: AlertController,
         private analytics: Analytics, private sanitizer: DomSanitizer,
         private playTracker: PlayTrackerService) {
-        addIcons({ download, documentAttachOutline, checkmarkOutline, closeOutline });
+        addIcons({ download, documentAttachOutline, checkmarkOutline, closeOutline, pauseCircleOutline });
     }
 
     ngOnInit() {
@@ -68,6 +70,7 @@ export class CoursePage implements OnInit, AfterViewInit {
             },
             techOrder: ['html5', 'youtube'],
         }, () => {
+            // @ts-ignore
             this.videoPlayer.hotkeys({
                 volumeStep: 0.1,
                 seekStep: 10,
@@ -111,6 +114,10 @@ export class CoursePage implements OnInit, AfterViewInit {
             viewed: 0,
             duration: 0
         };
+        this.lastPlayedVideoKey = Object.keys(history).sort((a, b) => {
+            // @ts-ignore
+            return history[b].updatedAt - history[a].updatedAt;
+        }).slice(0, 1)[0] ?? null;
         Object.keys(videos).forEach(lectureKey => {
             videos[lectureKey].history = history[videos[lectureKey].identifier] ?? { currentTime: null, updatedAt: null, duration: null };
             if (!videos[lectureKey].duration && videos[lectureKey].history.duration) {
