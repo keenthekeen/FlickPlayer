@@ -7,6 +7,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { PlayTrackerService, PlayTrackerServiceStub } from '../../play-tracker.service';
 import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
 import { ActivatedRoute } from '@angular/router';
+import { IonicModule } from '@ionic/angular/ionic-module';
 
 describe('CoursePage', () => {
     let component: CoursePage;
