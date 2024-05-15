@@ -27,7 +27,7 @@
     <div *ngIf="lastVideo$ | async as lastVideo">
         <p *ngIf="lastVideo.course">
             Last played:
-            <a (click)="goToLastVideo(lastVideo)">
+            <a (click)="goToLastVideo(lastVideo)" (keyup)="goToLastVideo(lastVideo)" tabindex="0">
                 <span class="course-name">{{ lastVideo.course }}</span>
                 <ion-icon name="play"></ion-icon>
             </a>

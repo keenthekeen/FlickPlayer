@@ -4,6 +4,7 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { FireAuthStub } from '../stubs';
 import { ManService, ManServiceStub } from '../man.service';
 import { RouterTestingModule } from '@angular/router/testing';
+import { IonicModule } from '@ionic/angular/ionic-module';
 
 describe('HomePage', () => {
     let component: HomePage;

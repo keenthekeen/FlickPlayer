@@ -12,7 +12,7 @@ import {PlayHistory, PlayTrackerService} from '../../play-tracker.service';
 import {Analytics, logEvent} from '@angular/fire/analytics';
 import {addIcons} from "ionicons";
 import {checkmarkOutline, closeOutline, documentAttachOutline, download, pauseCircleOutline} from "ionicons/icons";
-import Player from 'video.js/dist/types/player';
+import type Player from 'video.js/dist/types/player';
 
 @Component({
     selector: 'app-course',
