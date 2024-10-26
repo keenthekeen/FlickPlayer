@@ -28,17 +28,20 @@
                     <ion-text color="medium">
                         <p>
                             {{ currentVideo.title }} - {{ currentVideo.lecturer }}<br/>
-                            <span class="ion-hide-md-down">
-                                <strong>Hotkeys</strong>&emsp; Space: Pause, ▲/▼: Volume, ◄/►: Seek, F: Fullscreen |
-                            </span>
                             <ion-button (click)="setPlaybackSpeed()" (keyup)="setPlaybackSpeed()" fill="outline" size="small" tabindex="0" class="set-playback-speed-button">Set playback speed</ion-button>
-                            <a [href]="sanitize('//player.docchula.com/?url='+currentVideo.sourceExternal)" rel="noreferrer" target="_blank" class="play-with-docchula-a-tag">Play with Docchula Player</a>
+                            <span>
+                                | <a [href]="sanitize('//player.docchula.com/?url='+currentVideo.sourceExternal)" rel="noreferrer" target="_blank">
+                                Play with Docchula Player</a>
+                            </span>
                             <span *ngIf="isAndroid && currentVideo.sourceExternal">
                                 | <a [href]="sanitize('intent:'+currentVideo.sourceExternal+'#Intent;S.title='+encodeURIComponent(currentVideo.title)+';package=com.mxtech.videoplayer.ad;end')" rel="noreferrer">Play with MX Player</a>
                             </span>
                             <span *ngIf="(isIos || isAndroid) && currentVideo.sourceExternal">
                                 | <a [href]="sanitize('vlc://'+currentVideo.sourceExternal)" rel="noreferrer">Play with VLC</a>
                             </span>
+                        </p>
+                        <p class="ion-hide-md-down small-text">
+                            <strong>Hotkeys</strong>&emsp;&ensp; Space: Pause, ▲/▼: Volume, ◄/►: Seek, F: Fullscreen
                         </p>
                     </ion-text>
                     <ion-card *ngIf="currentVideo.sources.length === 0" color="warning">
