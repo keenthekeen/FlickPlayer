@@ -26,12 +26,6 @@ import { getFirestore, provideFirestore } from '@angular/fire/firestore';
         BrowserModule,
         AppRoutingModule,
         HttpClientModule,
-        provideFirebaseApp(() => initializeApp(environment.firebase)),
-        provideFirestore(() => getFirestore()),
-        provideAuth(() => getAuth()),
-        provideAnalytics(() => getAnalytics()),
-        providePerformance(() => getPerformance()),
-        provideRemoteConfig(() => getRemoteConfig()),
         WelcomePageModule,
         ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production }),
         IonApp,
@@ -43,7 +37,13 @@ import { getFirestore, provideFirestore } from '@angular/fire/firestore';
         { provide: INSTRUMENTATION_ENABLED, useValue: environment.production },
         { provide: DEBUG_MODE, useValue: !environment.production },
         { provide: DEFAULTS, useValue: environment.defaultRemoteConfig },
-        provideIonicAngular()
+        provideIonicAngular(),
+        provideFirebaseApp(() => initializeApp(environment.firebase)),
+        provideFirestore(() => getFirestore()),
+        provideAuth(() => getAuth()),
+        provideAnalytics(() => getAnalytics()),
+        providePerformance(() => getPerformance()),
+        provideRemoteConfig(() => getRemoteConfig()),
     ],
     bootstrap: [AppComponent]
 })
