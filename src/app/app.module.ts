@@ -8,30 +8,25 @@ import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { environment } from '../environments/environment';
 import { WelcomePageModule } from './welcome/welcome.module';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { DEBUG_MODE, UserTrackingService } from '@angular/fire/compat/analytics';
 import { INSTRUMENTATION_ENABLED } from '@angular/fire/compat/performance';
 import { DEFAULTS } from '@angular/fire/compat/remote-config';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
-import { getAnalytics, provideAnalytics } from '@angular/fire/analytics';
+import { getAnalytics, provideAnalytics, ScreenTrackingService, UserTrackingService as UserTrackingService_alias } from '@angular/fire/analytics';
 import { getPerformance, providePerformance } from '@angular/fire/performance';
 import { getRemoteConfig, provideRemoteConfig } from '@angular/fire/remote-config';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 
-@NgModule({
-    declarations: [AppComponent],
-    imports: [
-        BrowserModule,
+@NgModule({ declarations: [AppComponent],
+    bootstrap: [AppComponent], imports: [BrowserModule,
         AppRoutingModule,
-        HttpClientModule,
         WelcomePageModule,
         ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production }),
         IonApp,
-        IonRouterOutlet
-    ],
-    providers: [
+        IonRouterOutlet], providers: [
         { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
         UserTrackingService,
         { provide: INSTRUMENTATION_ENABLED, useValue: environment.production },
@@ -44,8 +39,9 @@ import { getFirestore, provideFirestore } from '@angular/fire/firestore';
         provideAnalytics(() => getAnalytics()),
         providePerformance(() => getPerformance()),
         provideRemoteConfig(() => getRemoteConfig()),
-    ],
-    bootstrap: [AppComponent]
-})
+        provideHttpClient(withInterceptorsFromDi()),
+        ScreenTrackingService,
+        UserTrackingService_alias,
+    ] })
 export class AppModule {
 }
