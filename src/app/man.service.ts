@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Observable, of} from 'rxjs';
 import {filter, map, tap, timeout} from 'rxjs/operators';
 import {environment} from '../environments/environment';
@@ -13,8 +13,10 @@ import {AuthService} from './auth.service';
 })
 export class ManService {
     private videoList: CourseGroupList;
-    private endpoint = ['https://flick-man-cf.docchula.com/', 'https://flick-man.docchula.com/'];
-    private originalEndpoint = ['https://flick-man-cf.docchula.com/'];
+    private endpoint = ['https://flick-man-app.docchula.com/',
+        'https://flick-man-cdn.docchula.com/',
+        'https://flick-man-cf.docchula.com/'];
+    private originalEndpoint = ['https://flick-man-cdn.docchula.com/'];
     private httpOptions = {
         headers: new HttpHeaders({
             Authorization: ''
@@ -59,12 +61,11 @@ export class ManService {
             }
             for (const courseKey of Object.keys(response.data.lectures)) {
                 let thisLecture = response.data.lectures[courseKey];
-                const identifierFragment = year + '/' + course + '/' + courseKey + '/';
                 thisLecture = {
                     ...thisLecture,
                     sources: thisLecture.sources ? thisLecture.sources.map(source => {
                         source.src = source.src
-                            ?? ((source.server ?? server) + identifierFragment + source.path);
+                            ?? ((source.server ?? server) + source.path);
                         if (source.src.includes('docchula.com')) {
                             source.src += (source.src.includes('?') ? '&key=' : '?key=') + encodeURIComponent(response.data.key);
                         }
@@ -72,7 +73,7 @@ export class ManService {
                     }) : [],
                     attachments: thisLecture.attachments ? thisLecture.attachments.map(source => {
                         source.src = source.src
-                            ?? ((source.server ?? server) + identifierFragment + source.path);
+                            ?? ((source.server ?? server) + source.path);
                         source.src += (source.src.includes('?') ? '&key=' : '?key=') + encodeURIComponent(response.data.key);
                         source.name = source.name ?? (source.path.startsWith('DL ') ? source.path.substring(3) : source.path);
                         return source;
