@@ -18,6 +18,7 @@ import type Player from 'video.js/dist/types/player';
     selector: 'app-course',
     templateUrl: './course.page.html',
     styleUrls: ['./course.page.scss'],
+    standalone: false
 })
 export class CoursePage implements OnInit, AfterViewInit {
     @ViewChild('videoPlayer') videoPlayerElement: ElementRef;
