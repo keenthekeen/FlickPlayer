@@ -1,9 +1,9 @@
 import {Injectable} from '@angular/core';
-import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import {Observable, of} from 'rxjs';
-import {filter, map, tap, timeout} from 'rxjs/operators';
+import {filter, map, timeout} from 'rxjs/operators';
 import {environment} from '../environments/environment';
-import {PlayHistoryValue} from './play-tracker.service';
+import {PlayHistory, PlayHistoryValue} from './play-tracker.service';
 import {getStringChanges, RemoteConfig} from '@angular/fire/remote-config';
 import {AuthService} from './auth.service';
 
@@ -12,10 +12,8 @@ import {AuthService} from './auth.service';
     providedIn: 'root'
 })
 export class ManService {
-    private videoList: CourseGroupList;
-    private endpoint = ['https://flick-man-app.docchula.com/',
-        'https://flick-man-cdn.docchula.com/',
-        'https://flick-man-cf.docchula.com/'];
+    private videoList: Observable<CourseListResponse>;
+    private endpoint = ['https://flick-man-app.docchula.com/', 'https://flick-man-cdn.docchula.com/'];
     private originalEndpoint = ['https://flick-man-cdn.docchula.com/'];
     private httpOptions = {
         headers: new HttpHeaders({
@@ -41,12 +39,11 @@ export class ManService {
         this.httpOptions.headers = this.httpOptions.headers.set('Authorization', 'Bearer ' + idToken);
     }
 
-    getVideoList(): Observable<CourseGroupList> {
-        return this.videoList ? of(this.videoList) : this.get<JSend<{ years: CourseGroupList }>>('v1/video').pipe(map(response => {
-            return response.data.years;
-        }), tap(a => {
-            this.videoList = a;
-        }));
+    getVideoList(): Observable<CourseListResponse> {
+        if (!this.videoList) {
+            this.videoList = this.get<JSend<CourseListResponse>>('v1/video').pipe(map(response => response.data));
+        }
+        return this.videoList;
     }
 
     getVideosInCourse(year: string, course: string) {
@@ -94,6 +91,22 @@ export class ManService {
         }));
     }
 
+    getPlayRecord(year: string, course: string) {
+        const params = new HttpParams().set("year",year).set("course", course);
+        return this.get<JSend<{
+            records: PlayHistory
+        }>>('v1/play_records', {params}).pipe(map(response => response?.data.records));
+    }
+
+    updatePlayRecord(uid: string, video_id: string, progress: number, speed: number) {
+        return this.post<JSend<null>>('v1/play_records', {
+            uid,
+            video_id,
+            progress,
+            speed,
+        });
+    }
+
     checkAuthorization(): Observable<boolean> {
         return this.get<object>('v1/auth_check').pipe(timeout(8000), map(a => a.hasOwnProperty('success')));
     }
@@ -102,13 +115,24 @@ export class ManService {
         this.endpoint.push(this.endpoint.shift());
     }
 
-    get<T>(path: string): Observable<T> {
+    get<T>(path: string, options?: object): Observable<T> {
         if (this.httpOptions.headers.get('Authorization').length < 30) {
             console.error('ManService ID token is not set.');
         } else if (!this.getEndpointLocation()) {
             console.error('ManService endpoint is not set.');
         } else {
-            return this.http.get<T>(this.getEndpointLocation() + path, this.httpOptions);
+            return this.http.get<T>(this.getEndpointLocation() + path, {...this.httpOptions, ...options});
+        }
+        return of(null);
+    }
+
+    post<T>(path: string, body: object): Observable<T> {
+        if (this.httpOptions.headers.get('Authorization').length < 30) {
+            console.error('ManService ID token is not set.');
+        } else if (!this.getEndpointLocation()) {
+            console.error('ManService endpoint is not set.');
+        } else {
+            return this.http.post<T>(this.getEndpointLocation() + path, body, this.httpOptions);
         }
         return of(null);
     }
@@ -138,7 +162,7 @@ export class ManService {
 
 export const ManServiceStub: Partial<ManService> = {
     getVideosInCourse: () => of({}),
-    getVideoList: () => of({}),
+    getVideoList: () => of({years: {}, last_fetched_at: '', last_played: null}),
     setIdToken: (idToken: string) => {
     }
 };
@@ -147,8 +171,15 @@ export interface CourseMembers {
     [key: string]: Lecture;
 }
 
-export interface CourseGroupList {
-    [key: string]: string[];
+export interface CourseListResponse {
+    years: {
+        [key: string]: {
+            name: string;
+            is_remote: boolean;
+        }[];
+    };
+    last_fetched_at: string;
+    last_played: { video: Lecture, updated_at: string, end_time: number } | null;
 }
 
 export interface Lecture {
@@ -173,6 +204,10 @@ export interface Lecture {
     duration?: number;
     durationInMin?: number;
     history?: PlayHistoryValue;
+    course?: {
+        name: string;
+        category: string;
+    };
 }
 
 export interface JSend<A> {

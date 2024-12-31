@@ -11,12 +11,12 @@
 
 <ion-content>
     <ion-list *ngIf="list$ | async as list">
-        <ion-item button *ngFor="let course of list" [routerLink]="course">
+        <ion-item button *ngFor="let course of list" [routerLink]="course.name">
             <ion-label>
-                <span class="e-learning-tag" *ngIf="course.endsWith(' [E-Learning]')">
+                <span class="e-learning-tag" *ngIf="course.is_remote">
                     MDCU <small>E-Learning</small>
                 </span>
-                {{ course.replace(' [E-Learning]', '') }}
+                {{ course.name }}
             </ion-label>
         </ion-item>
     </ion-list>

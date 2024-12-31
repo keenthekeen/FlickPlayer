@@ -1,5 +1,5 @@
-import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
-import {combineLatest, EMPTY, Observable} from 'rxjs';
+import {AfterViewInit, Component, ElementRef, OnInit, ViewChild, OnDestroy} from '@angular/core';
+import {combineLatest, EMPTY, Observable, share, Subject, takeUntil, timer} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
 import {CourseMembers, Lecture, ManService} from '../../man.service';
 import {map, switchMap} from 'rxjs/operators';
@@ -8,18 +8,19 @@ import 'videojs-hotkeys';
 import 'videojs-youtube';
 import {AlertController} from '@ionic/angular/standalone';
 import {DomSanitizer} from '@angular/platform-browser';
-import {PlayHistory, PlayTrackerService} from '../../play-tracker.service';
+import {PlayHistory} from '../../play-tracker.service';
 import {Analytics, logEvent} from '@angular/fire/analytics';
 import {addIcons} from "ionicons";
 import {checkmarkOutline, closeOutline, documentAttachOutline, download, pauseCircleOutline} from "ionicons/icons";
 import type Player from 'video.js/dist/types/player';
+import {ulid} from 'ulid';
 
 @Component({
     selector: 'app-course',
     templateUrl: './course.page.html',
     styleUrls: ['./course.page.scss'],
 })
-export class CoursePage implements OnInit, AfterViewInit {
+export class CoursePage implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild('videoPlayer') videoPlayerElement: ElementRef;
     videoPlayer: Player;
     currentVideo: Lecture;
@@ -33,11 +34,12 @@ export class CoursePage implements OnInit, AfterViewInit {
     isAndroid = /Android/i.test(navigator.userAgent);
     isIos = /iPad/i.test(navigator.userAgent) || /iPhone/i.test(navigator.userAgent);
     lastPlayedVideoKey: string|null = null;
+    sessionUid: string; // Unique ID for session x video (new id for each video)
+    stopPolling = new Subject();
 
     constructor(private route: ActivatedRoute, private router: Router,
         private manService: ManService, private alertController: AlertController,
-        private analytics: Analytics, private sanitizer: DomSanitizer,
-        private playTracker: PlayTrackerService) {
+                private analytics: Analytics, private sanitizer: DomSanitizer) {
         addIcons({ download, documentAttachOutline, checkmarkOutline, closeOutline, pauseCircleOutline });
     }
 
@@ -48,8 +50,13 @@ export class CoursePage implements OnInit, AfterViewInit {
                 this.course = s.get('course');
                 if (this.year && this.course) {
                     return combineLatest([
-                        this.manService.getVideosInCourse(this.year, this.course), this.playTracker.retrieve()])
-                        .pipe(map(([videos, history]) => this.mergeVideoInfo(videos, history)));
+                        this.manService.getVideosInCourse(this.year, this.course),
+                        timer(1, 30000).pipe(
+                            switchMap(() => this.manService.getPlayRecord(this.year, this.course)),
+                            share(),
+                            takeUntil(this.stopPolling),
+                        ),
+                    ]).pipe(map(([videos, history]) => this.mergeVideoInfo(videos, history)));
                 } else if (this.year) {
                     this.router.navigate(['home/' + this.year]);
                 } else {
@@ -80,24 +87,23 @@ export class CoursePage implements OnInit, AfterViewInit {
             this.videoPlayer.on('pause', () => {
                 if (!this.videoPlayer.seeking()) {
                     // is paused, not seeking
-                    this.playTracker.updateCurrentTime(this.currentVideo.identifier, this.videoPlayer.currentTime(), this.year, this.course, this.videoPlayer.duration());
+                    this.updatePlayRecord();
                 }
             });
-            this.videoPlayer.on('ended', () =>
-                this.playTracker.updateCurrentTime(this.currentVideo.identifier, this.videoPlayer.currentTime(), this.year, this.course, this.videoPlayer.duration()));
+            this.videoPlayer.on('ended', () => this.updatePlayRecord());
             let lastUpdated = 0;
             this.videoPlayer.on('timeupdate', () => {
-                // Update while playing every 10 minutes
-                if (Date.now() - lastUpdated > 600000) {
+                // Update while playing every 2 minutes
+                if (Date.now() - lastUpdated > 120000) {
                     lastUpdated = Date.now();
-                    this.playTracker.updateCurrentTime(this.currentVideo.identifier, this.videoPlayer.currentTime(), this.year, this.course, this.videoPlayer.duration());
+                    this.updatePlayRecord();
                 }
             });
             this.videoPlayer.on('tracking:performance', (_e, data) => {
                 console.log('performance');
                 if (this.videoPlayer.currentTime() > 30) {
                     logEvent(this.analytics, 'video_performance', this.attachEventLabel(data, true));
-                    this.playTracker.updateCurrentTime(this.currentVideo.identifier, data.currentTime, this.year, this.course);
+                    this.updatePlayRecord();
                 }
             });
             this.videoPlayer.on('loadedmetadata', () => {
@@ -107,6 +113,10 @@ export class CoursePage implements OnInit, AfterViewInit {
                 }
             });
         });
+    }
+
+    ngOnDestroy() {
+        this.stopPolling.next(true);
     }
 
     mergeVideoInfo(videos: CourseMembers, history: PlayHistory) {
@@ -119,11 +129,7 @@ export class CoursePage implements OnInit, AfterViewInit {
             return history[b].updatedAt - history[a].updatedAt;
         }).slice(0, 1)[0] ?? null;
         Object.keys(videos).forEach(lectureKey => {
-            videos[lectureKey].history = history[videos[lectureKey].identifier] ?? { currentTime: null, updatedAt: null, duration: null };
-            if (!videos[lectureKey].duration && videos[lectureKey].history.duration) {
-                videos[lectureKey].duration = videos[lectureKey].history.duration;
-                videos[lectureKey].durationInMin = videos[lectureKey].duration ? Math.round(videos[lectureKey].duration / 60) : 0
-            }
+            videos[lectureKey].history = history[videos[lectureKey].id] ?? { currentTime: null, updatedAt: null };
             if (videos[lectureKey].duration) {
                 progress.duration -= -videos[lectureKey].duration;
                 if (videos[lectureKey].history.currentTime) {
@@ -154,6 +160,7 @@ export class CoursePage implements OnInit, AfterViewInit {
         this.videoPlayer.src(video.sources);
         this.currentVideo = video;
         this.videoPlayerElement.nativeElement.focus();
+        this.sessionUid = ulid();
     }
 
     async setPlaybackSpeed() {
@@ -215,4 +222,7 @@ export class CoursePage implements OnInit, AfterViewInit {
         };
     }
 
+    protected updatePlayRecord() {
+        this.manService.updatePlayRecord(this.sessionUid, this.currentVideo.id, this.videoPlayer.currentTime(), this.videoPlayer.playbackRate()).subscribe();
+    }
 }

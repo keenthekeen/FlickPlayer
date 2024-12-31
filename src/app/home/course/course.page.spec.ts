@@ -4,7 +4,6 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { ActivatedRouteStub, FireAnalyticsStub, FireAuthStub } from '../../stubs';
 import { ManService, ManServiceStub } from '../../man.service';
 import { RouterTestingModule } from '@angular/router/testing';
-import { PlayTrackerService, PlayTrackerServiceStub } from '../../play-tracker.service';
 import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
 import { ActivatedRoute } from '@angular/router';
 import { IonicModule } from '@ionic/angular/ionic-module';
@@ -22,7 +21,6 @@ describe('CoursePage', () => {
                 { provide: AngularFireAnalytics, useValue: FireAnalyticsStub },
                 { provide: AngularFireAuth, useValue: FireAuthStub },
                 { provide: ManService, useValue: ManServiceStub },
-                { provide: PlayTrackerService, useValue: PlayTrackerServiceStub }
             ]
         }).compileComponents();
 

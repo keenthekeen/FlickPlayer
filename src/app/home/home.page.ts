@@ -1,11 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { last, Observable } from 'rxjs';
-import { ManService } from '../man.service';
-import { map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import {CourseListResponse, Lecture, ManService} from '../man.service';
 import { Router } from '@angular/router';
 import { AuthService } from '../auth.service';
 import { colorByFolderName } from '../../helpers';
-import { PlayHistoryValue, PlayTrackerService } from '../play-tracker.service';
 import { addIcons } from "ionicons";
 import { logOutOutline, play } from "ionicons/icons";
 
@@ -15,14 +13,10 @@ import { logOutOutline, play } from "ionicons/icons";
     styleUrls: ['home.page.scss']
 })
 export class HomePage implements OnInit {
-    folderList$: Observable<string[]>;
-    lastVideo$: Observable<PlayHistoryValue | null>;
-    protected readonly last = last;
+    response$: Observable<CourseListResponse>;
 
-    constructor(private manService: ManService, private router: Router, private authService: AuthService,
-        private playTracker: PlayTrackerService) {
+    constructor(private manService: ManService, private router: Router, private authService: AuthService) {
         addIcons({ logOutOutline, play });
-
     }
 
     logout() {
@@ -32,18 +26,14 @@ export class HomePage implements OnInit {
     }
 
     ngOnInit() {
-        this.folderList$ = this.manService.getVideoList().pipe(map(a => Object.keys(a)));
-        this.lastVideo$ = this.playTracker.retrieve().pipe(map(history => {
-            return Object.keys(history).sort((a, b) => {
-                // @ts-ignore
-                return history[b].updatedAt - history[a].updatedAt;
-            }).slice(0, 1).map(key => history[key])[0] ?? null;
-        }));
+        this.response$ = this.manService.getVideoList();
     }
 
     protected readonly colorByFolderName = colorByFolderName;
 
-    goToLastVideo(lastVideo: PlayHistoryValue) {
-        this.router.navigate(['home', lastVideo.year, lastVideo.course]);
+    goToLastVideo(lastVideo: Lecture) {
+        return this.router.navigate(['home', lastVideo.course.category, lastVideo.course.name]);
     }
+
+    protected readonly Object = Object;
 }

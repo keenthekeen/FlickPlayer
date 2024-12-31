@@ -27,9 +27,9 @@
                 <ng-container *ngIf="currentVideo">
                     <ion-text color="medium">
                         <p>
-                            {{ currentVideo.title }} - {{ currentVideo.lecturer }}<br/>
+                            {{ currentVideo.title }}<span v-if="currentVideo.lecturer"> - {{ currentVideo.lecturer }}</span><br/>
                             <ion-button (click)="setPlaybackSpeed()" (keyup)="setPlaybackSpeed()" fill="outline" size="small" tabindex="0" class="set-playback-speed-button">Set playback speed</ion-button>
-                            <span>
+                            <span *ngIf="currentVideo.sourceExternal?.includes('1.mp4')">
                                 | <a [href]="sanitize('//player.docchula.com/?url='+currentVideo.sourceExternal)" rel="noreferrer" target="_blank">
                                 Play with Docchula Player</a>
                             </span>

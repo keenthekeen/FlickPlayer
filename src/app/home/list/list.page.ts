@@ -4,7 +4,6 @@ import { EMPTY, Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { ManService } from '../../man.service';
 import { colorByFolderName } from '../../../helpers';
-import { IonRouterLink } from "@ionic/angular/standalone";
 
 @Component({
     selector: 'app-list',
@@ -13,7 +12,7 @@ import { IonRouterLink } from "@ionic/angular/standalone";
 })
 export class ListPage implements OnInit {
     year: string;
-    list$: Observable<string[]>;
+    list$: Observable<{ name: string, is_remote: boolean }[]>;
 
     constructor(private route: ActivatedRoute, private router: Router, private manService: ManService) {
     }
@@ -28,7 +27,7 @@ export class ListPage implements OnInit {
                     return EMPTY;
                 }
                 return this.manService.getVideoList().pipe(map(list => {
-                    return list[year];
+                    return list.years[year];
                 }));
             })
         );
