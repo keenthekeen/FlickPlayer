@@ -1,5 +1,5 @@
 import {AfterViewInit, Component, ElementRef, OnInit, ViewChild, OnDestroy} from '@angular/core';
-import {combineLatest, EMPTY, Observable, share, Subject, takeUntil, timer} from 'rxjs';
+import {combineLatest, EMPTY, Observable, startWith, Subject} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
 import {CourseMembers, Lecture, ManService} from '../../man.service';
 import {map, switchMap} from 'rxjs/operators';
@@ -33,9 +33,9 @@ export class CoursePage implements OnInit, AfterViewInit, OnDestroy {
     };
     isAndroid = /Android/i.test(navigator.userAgent);
     isIos = /iPad/i.test(navigator.userAgent) || /iPhone/i.test(navigator.userAgent);
-    lastPlayedVideoKey: string|null = null;
+    lastPlayedVideoKey: number = null;
     sessionUid: string; // Unique ID for session x video (new id for each video)
-    stopPolling = new Subject();
+    stopPolling = new Subject<boolean>();
 
     constructor(private route: ActivatedRoute, private router: Router,
         private manService: ManService, private alertController: AlertController,
@@ -51,11 +51,7 @@ export class CoursePage implements OnInit, AfterViewInit, OnDestroy {
                 if (this.year && this.course) {
                     return combineLatest([
                         this.manService.getVideosInCourse(this.year, this.course),
-                        timer(1, 30000).pipe(
-                            switchMap(() => this.manService.getPlayRecord(this.year, this.course)),
-                            share(),
-                            takeUntil(this.stopPolling),
-                        ),
+                        this.manService.getPlayRecord(this.year, this.course, this.stopPolling).pipe(startWith(null)),
                     ]).pipe(map(([videos, history]) => this.mergeVideoInfo(videos, history)));
                 } else if (this.year) {
                     this.router.navigate(['home/' + this.year]);
@@ -99,7 +95,7 @@ export class CoursePage implements OnInit, AfterViewInit, OnDestroy {
                     this.updatePlayRecord();
                 }
             });
-            this.videoPlayer.on('tracking:performance', (_e, data) => {
+            this.videoPlayer.on('tracking:performance', (_e: never, data: never) => {
                 console.log('performance');
                 if (this.videoPlayer.currentTime() > 30) {
                     logEvent(this.analytics, 'video_performance', this.attachEventLabel(data, true));
@@ -107,9 +103,9 @@ export class CoursePage implements OnInit, AfterViewInit, OnDestroy {
                 }
             });
             this.videoPlayer.on('loadedmetadata', () => {
-                if (this.currentVideo.history.currentTime
-                    && (!this.currentVideo.duration || (((this.currentVideo.history.currentTime ?? 0) / this.currentVideo.duration) < 0.995))) {
-                    this.videoPlayer.currentTime(this.currentVideo.history.currentTime);
+                if (this.currentVideo.history.end_time
+                    && (!this.currentVideo.duration || (((this.currentVideo.history.end_time ?? 0) / this.currentVideo.duration) < 0.995))) {
+                    this.videoPlayer.currentTime(this.currentVideo.history.end_time);
                 }
             });
         });
@@ -119,21 +115,25 @@ export class CoursePage implements OnInit, AfterViewInit, OnDestroy {
         this.stopPolling.next(true);
     }
 
-    mergeVideoInfo(videos: CourseMembers, history: PlayHistory) {
+    mergeVideoInfo(videos: CourseMembers, history: PlayHistory|null) {
+        if (!history) {
+            history = {};
+        }
         const progress = {
             viewed: 0,
             duration: 0
         };
-        this.lastPlayedVideoKey = Object.keys(history).sort((a, b) => {
+        this.lastPlayedVideoKey = Object.values(history).map(h => h.video_id).sort((a, b) => {
+            // force history[b].updated_at to be a string
             // @ts-ignore
-            return history[b].updatedAt - history[a].updatedAt;
+            return ('' + history[b].updated_at).localeCompare(history[a].updated_at);
         }).slice(0, 1)[0] ?? null;
         Object.keys(videos).forEach(lectureKey => {
-            videos[lectureKey].history = history[videos[lectureKey].id] ?? { currentTime: null, updatedAt: null };
+            videos[lectureKey].history = history[videos[lectureKey].id] ?? { end_time: null, updated_at: null };
             if (videos[lectureKey].duration) {
                 progress.duration -= -videos[lectureKey].duration;
-                if (videos[lectureKey].history.currentTime) {
-                    progress.viewed -= -videos[lectureKey].history.currentTime;
+                if (videos[lectureKey].history.end_time) {
+                    progress.viewed -= -videos[lectureKey].history.end_time;
                 }
             }
         });
@@ -214,7 +214,7 @@ export class CoursePage implements OnInit, AfterViewInit, OnDestroy {
         return lecture.identifier;
     }
 
-    protected attachEventLabel(data, isNonInteraction?: boolean) {
+    protected attachEventLabel(data: object, isNonInteraction?: boolean) {
         return {
             ...data,
             event_label: this.currentVideo.identifier,

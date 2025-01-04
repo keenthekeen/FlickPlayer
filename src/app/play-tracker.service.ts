@@ -1,10 +1,7 @@
 import {inject, Injectable} from '@angular/core';
 import {first, map, mergeMap, tap} from 'rxjs/operators';
-import {BehaviorSubject, fromEventPattern, Observable} from 'rxjs';
-import {
-    FieldValue,
-    Timestamp,
-} from '@angular/fire/firestore';
+import {fromEventPattern, Observable} from 'rxjs';
+import {FieldValue, Timestamp} from '@angular/fire/firestore';
 import Pusher from 'pusher-js';
 import Echo from 'laravel-echo';
 import {Auth, idToken, user} from '@angular/fire/auth';
@@ -17,37 +14,22 @@ export class PlayTrackerService {
     idToken$ = idToken(this.auth);
     user$ = user(this.auth);
 
-    private updates$: Observable<any>;
+    private readonly updates$: Observable<PlayHistoryValue>;
 
-    private readonly history$: BehaviorSubject<PlayHistory>;
     constructor() {
-        this.history$ = new BehaviorSubject({});
-
-        /*
-        const documentRef$ = authService.user.pipe(map(user => {
-            // Convert to a DocumentReference
-            return user ? doc(collection(aFirestore, 'users'), user.uid).withConverter(UserDocumentConverter) : null;
-        }));
-        documentRef$.subscribe(documentRef => {
-            this.documentRef = documentRef;
-        });
-        documentRef$.pipe(skipWhile(v => v == null), mergeMap(documentRef => docData(documentRef))).subscribe(document => {
-            this.history$.next(document ? (document.playHistory ?? {}) : {});
-        });*/
-
         // Setup websocket client
         // @ts-ignore
         window.Pusher = Pusher;
         const echo = new Echo({
             broadcaster: 'reverb',
             key: 'wr2uu6n8zkbel4nalzzl',
-            authEndpoint: 'http://localhost:8000/broadcasting/auth',
+            authEndpoint: 'https://flick-man-app.docchula.com/broadcasting/auth',
             auth: {headers: {Authorization: "Bearer " + idToken}},
-            wsHost: "localhost",
-            wsPort: 8080,
-            forceTLS: false,
-            enabledTransports: ['ws', 'wss'],
+            wsHost: "flick-man-ws.docchula.com",
+            wsPort: 443,
+            enabledTransports: ['wss', 'ws'],
         });
+        // @ts-ignore
         this.updates$ = this.idToken$.pipe(
             tap(idToken => {
                 if (idToken) {
@@ -60,25 +42,17 @@ export class PlayTrackerService {
             // Return observable only once
             mergeMap(userAndToken =>
                 fromEventPattern(handler => {
-                    echo.private("user." + userAndToken.user.email).listen("message", handler);
+                    echo.channel("user." + userAndToken.user.email).listen(".PlayRecordUpdated", handler);
                 }, () => echo.leaveChannel("user." + userAndToken.user.email))),
+            // @ts-ignore
+            map((data: Array<object>) => data[0].model),
         );
-        this.updates$.subscribe((data) => console.log(data));
-        setTimeout(() => {
-            echo.join("user.siwat.techa@docchula.com").whisper('typing', {
-                name: "aaa",
-            });
-        }, 3000);
     }
 
     retrieve() {
-        return this.history$;
+        return this.updates$;
     }
 }
-
-export const PlayTrackerServiceStub: Partial<PlayTrackerService> = {
-    retrieve: () => new BehaviorSubject<PlayHistory>({}),
-};
 
 export interface PlayHistory {
     [key: string]: PlayHistoryValue;
@@ -86,8 +60,9 @@ export interface PlayHistory {
 
 export interface PlayHistoryValue {
     duration?: number | null;
-    currentTime: number;
-    updatedAt: Timestamp | FieldValue;
+    end_time: number;
+    updated_at: Timestamp | FieldValue;
+    video_id?: number;
     year?: string;
     course?: string;
 }

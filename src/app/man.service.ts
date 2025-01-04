@@ -1,9 +1,9 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
-import {Observable, of} from 'rxjs';
-import {filter, map, timeout} from 'rxjs/operators';
+import {combineLatestWith, Observable, of, startWith, takeUntil, timer} from 'rxjs';
+import {filter, map, switchMap, timeout} from 'rxjs/operators';
 import {environment} from '../environments/environment';
-import {PlayHistory, PlayHistoryValue} from './play-tracker.service';
+import {PlayHistory, PlayHistoryValue, PlayTrackerService} from './play-tracker.service';
 import {getStringChanges, RemoteConfig} from '@angular/fire/remote-config';
 import {AuthService} from './auth.service';
 
@@ -22,7 +22,7 @@ export class ManService {
     };
 
     constructor(private http: HttpClient, authService: AuthService,
-                remoteConfig: RemoteConfig) {
+                private playTracker: PlayTrackerService, remoteConfig: RemoteConfig) {
         // Get authentication data
         authService.idToken.subscribe(idToken => this.setIdToken(idToken));
         if (environment.production) {
@@ -76,7 +76,7 @@ export class ManService {
                         return source;
                     }) : [],
                     identifier: thisLecture.identifier
-                        ?? ((course.includes('[E-Learning]') && thisLecture.id) ? thisLecture.id : (year.substring(0, 3).trim() + '/' + course.substring(0, 7).trim() + '/' + courseKey)),
+                        ?? ((course.includes('[E-Learning]') && thisLecture.id) ? String(thisLecture.id) : (year.substring(0, 3).trim() + '/' + course.substring(0, 7).trim() + '/' + courseKey)),
                     durationInMin: thisLecture.duration ? Math.round(thisLecture.duration / 60) : 0
                 };
                 for (const source of thisLecture.sources) {
@@ -91,14 +91,29 @@ export class ManService {
         }));
     }
 
-    getPlayRecord(year: string, course: string) {
-        const params = new HttpParams().set("year",year).set("course", course);
-        return this.get<JSend<{
-            records: PlayHistory
-        }>>('v1/play_records', {params}).pipe(map(response => response?.data.records));
+    getPlayRecord(year: string, course: string, stopPolling: Observable<boolean>): Observable<PlayHistory> {
+        const params = new HttpParams().set("year", year).set("course", course);
+        this.playTracker.retrieve().subscribe(console.log);
+        return timer(1, 60000).pipe(
+            switchMap(() => this.get<JSend<{
+                records: PlayHistory
+            }>>('v1/play_records', {params}).pipe(map(response => response?.data.records))),
+            // Replace value with update from play tracker if available
+            combineLatestWith(this.playTracker.retrieve().pipe(startWith(null))),
+            map(([records, update]) => {
+                if (update) {
+                    if (!records[update.video_id] ||
+                        (records[update.video_id].updated_at < update.updated_at)) {
+                        records[update.video_id] = update;
+                    }
+                }
+                return records;
+            }),
+            takeUntil(stopPolling),
+        );
     }
 
-    updatePlayRecord(uid: string, video_id: string, progress: number, speed: number) {
+    updatePlayRecord(uid: string, video_id: string | number, progress: number, speed: number) {
         return this.post<JSend<null>>('v1/play_records', {
             uid,
             video_id,
@@ -186,7 +201,7 @@ export interface Lecture {
     title: string;
     lecturer: string;
     date: string | null;
-    id?: string; // Server-side ID
+    id?: number; // Server-side ID
     identifier?: string; // Client-side ID, deprecated
     sources: {
         path: string,
