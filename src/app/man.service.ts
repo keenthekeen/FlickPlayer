@@ -22,17 +22,18 @@ export class ManService {
     };
 
     constructor(private http: HttpClient, authService: AuthService,
-                private playTracker: PlayTrackerService, remoteConfig: RemoteConfig) {
-        // Get authentication data
-        authService.idToken.subscribe(idToken => this.setIdToken(idToken));
-        if (environment.production) {
+                private playTracker: PlayTrackerService) {
+        // remoteConfig: RemoteConfig
+        /* if (environment.production) {
             // Get endpoint config
             getStringChanges(remoteConfig, 'manEndpoint').pipe(filter(v => !!v)).subscribe(v => {
                 const w = v.split(',');
                 this.endpoint = w;
                 this.originalEndpoint = w;
             });
-        }
+        } */
+        // Get authentication data
+        authService.idToken.subscribe(idToken => this.setIdToken(idToken));
     }
 
     setIdToken(idToken: string) {
