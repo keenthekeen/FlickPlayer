@@ -89,8 +89,8 @@ export class CoursePage implements OnInit, AfterViewInit, OnDestroy {
             this.videoPlayer.on('ended', () => this.updatePlayRecord());
             let lastUpdated = 0;
             this.videoPlayer.on('timeupdate', () => {
-                // Update while playing every 2 minutes
-                if (Date.now() - lastUpdated > 120000) {
+                // Update while playing every 20 seconds
+                if (Date.now() - lastUpdated > 20000) {
                     lastUpdated = Date.now();
                     this.updatePlayRecord();
                 }
@@ -103,6 +103,7 @@ export class CoursePage implements OnInit, AfterViewInit, OnDestroy {
                 }
             });
             this.videoPlayer.on('loadedmetadata', () => {
+                // On video load, seek to last played position
                 if (this.currentVideo.history.end_time
                     && (!this.currentVideo.duration || (((this.currentVideo.history.end_time ?? 0) / this.currentVideo.duration) < 0.995))) {
                     this.videoPlayer.currentTime(this.currentVideo.history.end_time);
