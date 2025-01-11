@@ -1,10 +1,8 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import {combineLatestWith, Observable, of, startWith, takeUntil, timer} from 'rxjs';
-import {filter, map, switchMap, timeout} from 'rxjs/operators';
-import {environment} from '../environments/environment';
+import {map, switchMap, timeout} from 'rxjs/operators';
 import {PlayHistory, PlayHistoryValue, PlayTrackerService} from './play-tracker.service';
-import {getStringChanges, RemoteConfig} from '@angular/fire/remote-config';
 import {AuthService} from './auth.service';
 
 
@@ -115,6 +113,7 @@ export class ManService {
     }
 
     updatePlayRecord(uid: string, video_id: string | number, progress: number, speed: number) {
+        // @todo Throttle this function
         return this.post<JSend<null>>('v1/play_records', {
             uid,
             video_id,
